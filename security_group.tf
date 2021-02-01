@@ -4,11 +4,11 @@ resource "aws_security_group" "opencti" {
   vpc_id = local.vpc_id
 
   ingress {
-    description = "opencti inbound access"
+    description = "Allow access from these IPs"
     from_port   = 4000
     to_port     = 4000
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/24"] # change
+    cidr_blocks = ["put.your.ip.here/32", "another.ip.address.here/32"]
   }
 
   egress {

@@ -1,10 +1,8 @@
 #! /bin/bash -e
 
 # Script: ubuntu_opencti_installer.sh
-# Purpose: To automate install opencti based on manual deployment below
-# Process: https://www.notion.so/Manual-deployment-b911beba44234f179841582ab3894bb1
-# Disclaimer: This script is written for testing and runs as root. Check the code and use at your own risk!
-# The author is not liable for any damages or unexpected explosions!
+# Purpose: To automate the installation of OpenCTI. Based on this manual deployment: https://www.notion.so/Manual-deployment-b911beba44234f179841582ab3894bb1
+# Disclaimer: This script is written for testing and runs as root. Check the code and use at your own risk! The author is not liable for any damages or unexpected explosions!
 # License: Apache 2.0
 
 # ####################
@@ -14,7 +12,6 @@
 # Function: print_banner
 # Print a massive OpenCTI banner.
 # Parameters: None
-# Returns: Nothing
 function print_banner {
   echo -e "\n\n\x1B[1;49;34mMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
   echo -e "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"
@@ -60,7 +57,6 @@ function print_banner {
 # Prints an obnoxious line, the time (with second precision), and the section heading. This visually separates the log and makes it more readable.
 # Parameters:
 # - $1: section heading
-# Returns: Nothing
 function log_section_heading {
   echo "###^^^###^^^###^^^###^^^###"
   date --iso-8601=seconds
@@ -71,7 +67,6 @@ function log_section_heading {
 # Function: check_root
 # Check if we are logged in as root (UID 0) and exit if not.
 # Parameters: None
-# Returns: Nothing
 function check_root {
   echo "Checking if root..."
   if [ "$EUID" -ne 0 ]
@@ -84,7 +79,6 @@ function check_root {
 # Function: warn_user
 # Warn the user that the script is running with root privileges and to be cautious.
 # Parameters: None
-# Returns: Nothing
 function warn_user {
   echo -e "\x1B[0;49;91mThis script runs with elevated access; check the code and use at your own risk!\x1B[0m"
   echo
@@ -93,7 +87,6 @@ function warn_user {
 # Function: quit_on_error
 # On a failure, this function prints the reason for the failure and exits the script.
 # Parameters: String containing exit reason
-# Returns: Nothing
 function quit_on_error {
   if [[ $? -gt 0 ]]
   then
@@ -107,7 +100,6 @@ function quit_on_error {
 # Function: update_apt_pkg
 # Non-interactive package management which updates the supplied package.
 # Parameters: The package to update.
-# Returns: Nothing
 function update_apt_pkg {
   DEBIAN_FRONTEND=noninteractive apt-get -qq update
   quit_on_error "Checking packages"
@@ -118,25 +110,16 @@ function update_apt_pkg {
 # Parameters:
 # - $1: package to install
 # - $2: version to install
-# Returns: Nothing
 function check_apt_pkg {
   if [[ $(dpkg -l | grep $1) ]]
   then
     echo >&2 "$1 found, attempting upgrade: executing apt-get -y install --only-upgrade '$1''$2'";
-    # DEBIAN_FRONTEND=noninteractive apt -qq install --only-upgrade "$1""$2" > /dev/null 2>&1;
-
-    # Made this not quite so we can see what errors were occurring - KTW
-    apt-get -y install --only-upgrade "$1""$2";
-
-    # quit_on_error "Upgrading $1$2"
+    DEBIAN_FRONTEND=noninteractive apt -qq install --only-upgrade "$1""$2" > /dev/null 2>&1;
+    quit_on_error "Upgrading $1$2"
   else
     echo >&2 "$1 missing, attempting install: executing apt-get -y install '$1''$2'";
-    # DEBIAN_FRONTEND=noninteractive apt -qq -y install "$1""$2" > /dev/null 2>&1;
-
-    # Made this not quit so we can see what errors were occurring - KTW
-    apt-get -y install "$1""$2";
-
-    # quit_on_error "Installing $1$2"
+    DEBIAN_FRONTEND=noninteractive apt -qq -y install "$1""$2" > /dev/null 2>&1;
+    quit_on_error "Installing $1$2"
   fi
 }
 
@@ -144,9 +127,8 @@ function check_apt_pkg {
 # Checks if a service is active or nah. Matches Grakn service output.
 # Parameters:
 # - $1: service to check
-# Returns: Nothing
 function check_service {
-  if [[ $(systemctl is-active "$1") == "active" ]]
+  if [[ $(systemctl show -p ActiveState --value "$1") == "active" ]]
   then
     echo "$1: RUNNING"
   else
@@ -158,14 +140,13 @@ function check_service {
 # Checks if a service is disabled and enables it. If the service is already running, restart it. Otherwise, start the service.
 # Parameters:
 # - $1: service name
-# Returns: Nothing
 function enable_service {
   if [[ $(systemctl is-enabled "$1") == "disabled" ]]
   then
     echo "$1 service not enabled."
     systemctl enable --now "$1"
     quit_on_error "Enabling $1"
-  elif [[ $(systemctl show -p SubState "$1" | awk -F"=" '{ print $2 }') == "running" ]]
+  elif [[ $(systemctl show -p SubState --value "$1") == "running" ]]
   then
     echo "$1 service already running."
     systemctl restart "$1"
@@ -175,22 +156,19 @@ function enable_service {
     systemctl start "$1"
     quit_on_error "Starting $1"
   fi
-
-  sleep 5  # wait for services to be ready
 }
 
 # Function: disable_service
 # For the provided service, if it is enabled, disable it; otherwise, if it's running, stop it; otherwise do nothing.
 # Parameters:
 # - $1: service name
-# Returns: Nothing
 function disable_service {
   if [[ $(systemctl is-enabled "$1") == "enabled" ]]
   then
     echo "$1 service enabled. Disabling."
     systemctl disable --now "$1"
     quit_on_error "Disabling $1"
-  elif [[ $(systemctl show -p SubState "$1" | awk -F"=" '{ print $2 }') == "running" ]]
+  elif [[ $(systemctl show -p SubState --value "$1") == "running" ]]
   then
     echo "$1 service still running. Stopping."
     systemctl stop "$1"
@@ -206,15 +184,10 @@ function disable_service {
 # ################
 
 # Check Ubuntu version for Python:
-# - 16 uses 2 (will install 3)
 # - 18 uses 3.6 (will install 3.7)
 # - 20 uses 3.8
 ubuntu_version=$(grep "Ubuntu " /etc/lsb-release | cut -d" " -f2 | cut -d\. -f1)
-if [[ ${ubuntu_version} == 16 ]]
-then
-  distro="xenial"
-  run_python="python3"
-elif [[ ${ubuntu_version} == 18 ]]
+if [[ ${ubuntu_version} == 18 ]]
 then
   distro="bionic"
   run_python="python3.7"
@@ -228,9 +201,7 @@ else
 fi
 
 # Grakn
-# grakn_core_server_ver="1.7.2"
-# grakn_console_ver="1.0.5"
-# grakn_core_all_ver="1.7.2"
+grakn_version="2.0.0-alpha-4"
 
 # Minio
 minio_dir="/opt/minio/data"
@@ -330,8 +301,11 @@ log_section_heading "Grakn"
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 8F3DA4B5E9AEF44C
 sudo add-apt-repository 'deb [ arch=all ] https://repo.grakn.ai/repository/apt/ trusty main'
 update_apt_pkg
-apt-get install -y grakn-console=2.0.0-alpha-3 # Required dependency
-apt-get install -y grakn-core-all
+# apt-get install -y grakn-console=2.0.0-alpha-3 # Required dependency
+# apt-get install -y grakn-core-all
+check_apt_pkg 'grakn-core-server' "=${grakn_version}"
+check_apt_pkg 'grakn-console' "=${grakn_version}"
+check_apt_pkg 'grakn-core-all' "=${grakn_version}"
 
 ### Create systemd unit file for Grakn
 cat <<EOT > /etc/systemd/system/grakn.service
@@ -533,16 +507,8 @@ chown -R $(whoami):$(id -gn) "${opencti_dir}"
 echo "OpenCTI: Installing Python dependencies"
 ${run_python} -m pip -q install -r "${opencti_dir}/connectors/export-file-stix/src/requirements.txt"
 ${run_python} -m pip -q install -r "${opencti_dir}/connectors/import-file-stix/src/requirements.txt"
-
-# The install errs on 0.18.1, so have it install any version it can.
-# sed -i 's/sigmatools==0.18.1/sigmatools/' "${opencti_dir}/src/python/requirements.txt"
 ${run_python} -m pip -q install -r "${opencti_dir}/src/python/requirements.txt"
-
-# Not liking this version
-# sed -i '/black==20.8b1/d' "${opencti_dir}/worker/requirements.txt"
 ${run_python} -m pip -q install -r "${opencti_dir}/worker/requirements.txt"
-
-# 2.25.0 is required by pycti
 ${run_python} -m pip install requests==2.25.0
 
 echo "OpenCTI: Edit configs"
@@ -554,7 +520,7 @@ RADMINTOKEN="$(uuidgen -r | tr -d '\n' | tr '[:upper:]' '[:lower:]')"
 
 echo "OpenCTI: Copy proper configs"
 # Take default configuration and fill in our values.
-cat ${opencti_dir}/config/default.json | jq '.app.admin.email="${opencti_email}" | .app.admin.password="${RADMINPASS}" | .app.admin.token="${RADMINTOKEN}" | .minio.access_key="${RMINIOAK}" | .minio.secret_key="${RMINIOSK}" | .rabbitmq.username="${RRMQUNAME}" | .rabbitmq.password="${RRMQPASS}"' > ${opencti_dir}/config/production.json
+cat ${opencti_dir}/config/default.json | jq ".app.admin.email=\"${opencti_email}\" | .app.admin.password=\"${RADMINPASS}\" | .app.admin.token=\"${RADMINTOKEN}\" | .minio.access_key=\"${RMINIOAK}\" | .minio.secret_key=\"${RMINIOSK}\" | .rabbitmq.username=\"${RRMQUNAME}\" | .rabbitmq.password=\"${RRMQPASS}\"" > ${opencti_dir}/config/production.json
 
 echo "OpenCTI: Create unit file"
 cat > /etc/systemd/system/opencti-server.service <<- EOT
@@ -578,7 +544,7 @@ cp "$opencti_dir/worker/config.yml.sample" "$opencti_dir/worker/config.yml"
 echo "OpenCTI: Edit worker configuration"
 sed -i'' -e 's/token: '"'"'ChangeMe'"'"'/token: '"${RADMINTOKEN}"'/g' "$opencti_dir/worker/config.yml"
 
-## The port actually appears to be 4000, not 8080. - KTW
+# Switch to port 4000
 sed -i "s/'http:\/\/localhost:8080'/'http:\/\/localhost:4000'/" "$opencti_dir/worker/config.yml"
 
 echo "OpenCTI: create unit file"

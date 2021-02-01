@@ -2,8 +2,7 @@
 
 # Script: ubuntu_opencti_connectors.sh
 # Purpose: To automate the installation of OpenCTI connectors based on the manual deployment here: https://www.notion.so/Connectors-4586c588462d4a1fb5e661f2d9837db8
-# Disclaimer: This script is written for testing and runs as root. Check the code and use at your own risk!
-# The author is not liable for any damages or unexpected explosions!
+# Disclaimer: This script is written for testing and runs as root. Check the code and use at your own risk! The author is not liable for any damages or unexpected explosions!
 # License: Apache 2.0
 
 # ################
@@ -113,12 +112,16 @@ opencti_connector_dir="${opencti_dir}/connectors"
 opencti_url="http://localhost:4000"
 opencti_token=$(grep token ${opencti_dir}/config/production.json | cut -d\" -f4)
 
-# Python version
-if [[ $(grep "Ubuntu " /etc/lsb-release | cut -d" " -f2 | cut -d\. -f1) == 18 ]]
+# Check Ubuntu version for Python:
+# - 18 uses 3.6 (will install 3.7)
+# - 20 uses 3.8
+ubuntu_version=$(grep "Ubuntu " /etc/lsb-release | cut -d" " -f2 | cut -d\. -f1)
+if [[ ${ubuntu_version} == 18 ]]
 then
   python_ver="3.7"
-elif [[ $(grep "Ubuntu " /etc/lsb-release | cut -d" " -f2 | cut -d\. -f1) == 20 ]]
+elif [[ ${ubuntu_version} == 20 ]]
 then
+  # Using bionic since focal not avaialble yet for RabbitMQ
   python_ver="3"
 else
   quit_on_error echo "You are using an unsupported version of Ubuntu. Exiting."
@@ -137,8 +140,8 @@ warn_user
 # This will only set up your instance for the connectors enabled. You must supply an API token (e.g., alienvault token) and enable the service.
 # It should be safe to run this after changing configs or enabling services.
 declare -A CONNECTORS;
-CONNECTORS['alienvault']=0
-CONNECTORS['amitt']=0
+CONNECTORS['alienvault']=0 # this
+CONNECTORS['amitt']=0 # this
 CONNECTORS['crowdstrike']=0
 CONNECTORS['cryptolaemus']=0
 CONNECTORS['cve']=1
