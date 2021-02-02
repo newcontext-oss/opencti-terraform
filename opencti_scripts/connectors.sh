@@ -173,7 +173,7 @@ done
 if [[ ! $show_user_prompt ]]
 then
   echo
-  read -p "Are you sure you want to continue with the list above? " -n 1 -r
+  read -p "Are you sure you want to continue with the list above? [y/N] " -n 1 -r
   echo
   if [[ ! $REPLY =~ ^[Yy]$ ]]
   then
