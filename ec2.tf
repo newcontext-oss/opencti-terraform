@@ -1,5 +1,5 @@
 # EC2 Instance
-resource "aws_instance" "test" {
+resource "aws_instance" "opencti" {
   ami           = local.ami_id
   instance_type = local.instance_type
 

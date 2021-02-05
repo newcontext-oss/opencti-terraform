@@ -1,4 +1,9 @@
 # opencti-terraform
+## AWS
+
+
+## Azure
+
 ## Before you deploy
 Before you get going, you will need to edit `main.tf` with the path to your AWS credentials and with the e-mail you want OpenCTI to use.
 
