@@ -260,6 +260,9 @@ disable_service 'rabbitmq-server'
 disable_service 'minio'
 disable_service 'grakn'
 
+# The VMs we're running are not that big and we're going to quickly fill the system log with our work (and especially the connectors). This will max out the logs at 100M.
+echo "SystemMaxUse=100M" >> /etc/systemd/journald.conf
+
 # Ensure required packages are installed at latest (or specified) version. Repositories were updated in the wrapper script.
 log_section_heading "Installing and updating required packages"
 update_apt_pkg
