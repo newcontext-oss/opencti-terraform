@@ -3,7 +3,7 @@ resource "aws_instance" "opencti" {
   ami           = local.ami_id
   instance_type = local.instance_type
 
-  # Default VPC subnet
+  # Default VPC subnet for NC Sandbox
   subnet_id                   = local.subnet_id
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.opencti-profile.name
@@ -18,6 +18,6 @@ resource "aws_instance" "opencti" {
   vpc_security_group_ids = [aws_security_group.opencti.id]
 
   tags = {
-    Name = "opencti-test"
+    Name = "opencti"
   }
 }

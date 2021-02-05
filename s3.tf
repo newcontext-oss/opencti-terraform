@@ -22,19 +22,19 @@ resource "aws_iam_policy" "opencti-s3" {
   policy = data.aws_iam_policy_document.opencti-s3.json
 }
 
-# OpenCTI installer script
 resource "aws_iam_role_policy_attachment" "opencti-s3-attach" {
   role       = aws_iam_role.opencti.name
   policy_arn = aws_iam_policy.opencti-s3.arn
 }
 
-# OpenCTI Connectors script
+# OpenCTI installer script
 resource "aws_s3_bucket_object" "opencti-install-script" {
   bucket = aws_s3_bucket.opencti.id
   key    = "opencti-installer.sh"
   source = "opencti_scripts/installer.sh"
 }
 
+# OpenCTI connectors script
 resource "aws_s3_bucket_object" "opencti-connectors-script" {
   bucket = aws_s3_bucket.opencti.id
   key    = "opencti-connectors.sh"
