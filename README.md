@@ -30,7 +30,9 @@ First, change into the `azure/` directory:
 cd azure/
 ```
 
-Then, you will need to set the following before you can deploy:
+Then, you will need to login to Azure CLI and set some things. Let's do Azure login first. Follow [these steps](https://docs.microsoft.com/en-us/azure/developer/terraform/get-started-cloud-shell) to create an Azure service principal and login (make sure that once you have run the `az ad sp create-for-rbac ...` command that you then do the `az login ...` command that's listed after it).
+
+Next, set the following before you can deploy:
 - ...
 
 ## Deployment
