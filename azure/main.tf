@@ -17,8 +17,14 @@ resource "azurerm_resource_group" "opencti_rg" {
 }
 
 locals {
-  opencti_install_email          = "login.email@example.com"
-  opencti_install_script_name    = "opencti-installer.sh"
-  opencti_connectors_script_name = "opencti-connectors.sh"
+  # This size is:
+  # {
+  #   "maxDataDiskCount": 4,
+  #   "memoryInMb": 3584,
+  #   "name": "Standard_DS1_v2",
+  #   "numberOfCores": 1,
+  #   "osDiskSizeInMb": 1047552,
+  #   "resourceDiskSizeInMb": 7168
+  # }
   instance_type                  = "Standard_DS1_v2"
 }

@@ -8,7 +8,7 @@ output "tls_private_key" { value = tls_private_key.ssh_private_key.private_key_p
 
 # Create Ubuntu virtual machine and attach it to the virtual NIC.
 resource "azurerm_linux_virtual_machine" "opencti_vm" {
-  name                  = "OpenCTI virtual machine"
+  name                  = "opencti_vm"
   location              = "eastus"
   resource_group_name   = azurerm_resource_group.opencti_rg.name
   network_interface_ids = [azurerm_network_interface.opencti_nic.id]
@@ -17,7 +17,7 @@ resource "azurerm_linux_virtual_machine" "opencti_vm" {
   os_disk {
     name                 = "os_disk"
     caching              = "ReadWrite"
-    storage_account_type = "Premium_LRS"
+    storage_account_type = "Standard_LRS"
   }
 
   source_image_reference {
@@ -27,7 +27,7 @@ resource "azurerm_linux_virtual_machine" "opencti_vm" {
     version   = "latest"
   }
 
-  computer_name                   = "opencti_vm"
+  computer_name                   = "opencti-vm" # underscores not allowed
   admin_username                  = "azureuser"
   disable_password_authentication = true
 
@@ -38,6 +38,24 @@ resource "azurerm_linux_virtual_machine" "opencti_vm" {
 
   boot_diagnostics {
     storage_account_uri = azurerm_storage_account.opencti_storage.primary_blob_endpoint
+  }
+
+  # Deploy the OpenCTI wrapper script
+  provisioner "file" {
+    source                         = "../userdata/installation-wrapper-script.sh"
+    destination                    = "/opt"
+  }
+
+  # OpenCTI installer script
+  provisioner "file" {
+    source      = "../opencti_scripts/installer.sh"
+    destination = "/opt"
+  }
+
+  # OpenCTI connectors script
+  provisioner "file" {
+    source      = "../opencti_scripts/connectors.sh"
+    destination = "/opt"
   }
 
   tags = {
