@@ -14,5 +14,6 @@ locals {
   opencti_connectors_script_name = "opencti-connectors.sh"
   vpc_id                         = "vpc-FILLTHISIN"
   subnet_id                      = "subnet-FILLTHISIN"
+  # 2 vCPU, 4 GB RAM
   instance_type                  = "t3.medium"
 }

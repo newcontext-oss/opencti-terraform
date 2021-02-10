@@ -17,14 +17,16 @@ resource "azurerm_resource_group" "opencti_rg" {
 }
 
 locals {
-  # This size is:
+  location               = "eastus"
+  # This instance size is:
   # {
   #   "maxDataDiskCount": 4,
-  #   "memoryInMb": 3584,
-  #   "name": "Standard_DS1_v2",
-  #   "numberOfCores": 1,
+  #   "memoryInMb": 4096,
+  #   "name": "Standard_A2_v2",
+  #   "numberOfCores": 2,
   #   "osDiskSizeInMb": 1047552,
-  #   "resourceDiskSizeInMb": 7168
+  #   "resourceDiskSizeInMb": 20480
   # }
-  instance_type                  = "Standard_DS1_v2"
+  # To see other sizes, run `az vm list-sizes --location <location>`
+  instance_type = "Standard_A2_v2"
 }

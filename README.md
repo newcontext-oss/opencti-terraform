@@ -38,9 +38,19 @@ Next, set the following before you can deploy:
 ## Deployment
 To see what Terraform is going to do and make sure you're cool with it, create a plan (`terraform plan`) and check it over. Once you're good to go, apply it (`terraform apply`).
 
+### AWS
 Once the instance is online, connect to it via SSM (Systems Manager) in the AWS console. You can follow along with the install by checking the logfile:
 ```
 tail -F /var/log/user-data.log
+```
+
+### Azure
+To login, run the following commands. These will remove the old SSH key, put the new one in place, fix the permissions, and print the login command:
+```
+rm -f ~/.ssh/azureuser
+cat terraform.tfstate | jq '.outputs.tls_private_key.value' | sed 's/"//g' | awk '{ gsub(/\\\\n/,"\\n") }1' > ~/.ssh/azureuser
+chmod 400 ~/.ssh/azureuser
+ssh -i ~/.ssh/azureuser azureuser@$(az vm show --resource-group OpenCTI --name opencti_vm -d --query [publicIps] -o tsv)
 ```
 
 ## Post-deployment
