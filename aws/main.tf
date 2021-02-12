@@ -14,5 +14,6 @@ locals {
   opencti_connectors_script_name = "opencti-connectors.sh"
   vpc_id                         = "vpc-FILLTHISIN"
   subnet_id                      = "subnet-FILLTHISIN"
-  instance_type                  = "t3.medium"
+  # This instance type is an 8x16 node with EBS-backed storage.
+  instance_type                  = "a1.2xlarge"
 }

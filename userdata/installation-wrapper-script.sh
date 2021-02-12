@@ -5,6 +5,7 @@
 exec > >(tee /var/log/opencti-install.log|logger -t opencti-install -s 2>/dev/console) 2>&1
 
 echo "Update base OS"
+exit
 apt-get update
 apt-get upgrade -y
 

@@ -329,6 +329,21 @@ enable_service 'grakn'
 
 ## Elasticsearch
 log_section_heading "Elasticsearch"
+echo "Setting up logrotate for Elasticsearch"
+# rotate 20 logs at 50M means a maximum of 1GB Elasticsearch logs.
+cat <<EOT > /etc/logrotate.d/elasticsearch
+/var/log/elasticsearch/*.log {
+  daily
+  rotate 20
+  size 50M
+  copytruncate
+  compress
+  delaycompress
+  missingok
+  notifempty
+  create 644 elasticsearch elasticsearch
+}
+EOT
 wget -qO - 'https://artifacts.elastic.co/GPG-KEY-elasticsearch' | apt-key add -
 add-apt-repository "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
 update_apt_pkg
