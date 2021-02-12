@@ -1,13 +1,13 @@
 # Control the flow of network traffic in and out of the VM.
 resource "azurerm_network_security_group" "opencti_network_security_group" {
   name                = "opencti_network_security_group"
-  location            = "eastus"
+  location            = local.location
   resource_group_name = azurerm_resource_group.opencti_rg.name
 
   # Allow SSH on port 22
   security_rule {
     name                       = "SSH"
-    priority                   = 100
+    priority                   = 200
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
@@ -20,7 +20,7 @@ resource "azurerm_network_security_group" "opencti_network_security_group" {
   # Allow access to application on port 4000
   security_rule {
     name                       = "opencti_app_inbound"
-    priority                   = 200
+    priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "*"

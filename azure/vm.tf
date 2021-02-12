@@ -10,7 +10,6 @@ output "tls_private_key" { value = tls_private_key.ssh_private_key.private_key_p
 data "template_file" "wrapper_script" {
   template = file("../userdata/installation-wrapper-script.sh")
   vars = {
-    # AWS has to copy the file from storage; Azure doesn't so we can disable that part of the script here.
     "account_name"           = "Pay-As-You-Go"
     "bucket_name"            = "only for aws"
     "connection_string"      = azurerm_storage_account.opencti_storage.primary_connection_string

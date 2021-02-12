@@ -11,7 +11,7 @@ resource "random_id" "randomId" {
 
 # Create storage account (the name is based on the above randomId). The default storage type is StorageV2: https://docs.microsoft.com/en-us/azure/storage/common/storage-account-overview
 resource "azurerm_storage_account" "opencti_storage" {
-  name                     = "diag${random_id.randomId.hex}"
+  name                     = "opencti${random_id.randomId.hex}"
   resource_group_name      = azurerm_resource_group.opencti_rg.name
   location                 = local.location
   account_replication_type = "LRS"
@@ -30,7 +30,6 @@ resource "azurerm_storage_container" "opencti-storage-container" {
 }
 
 # Store the install and connectors scripts in the storage container.
-# OpenCTI installer script
 resource "azurerm_storage_blob" "install_script" {
   name                   = "opencti-installer.sh"
   storage_account_name   = azurerm_storage_account.opencti_storage.name
@@ -40,7 +39,6 @@ resource "azurerm_storage_blob" "install_script" {
   source                 = "../opencti_scripts/installer.sh"
 }
 
-# OpenCTI connectors script
 resource "azurerm_storage_blob" "connectors_script" {
   name                   = "opencti-connectors.sh"
   storage_account_name   = azurerm_storage_account.opencti_storage.name

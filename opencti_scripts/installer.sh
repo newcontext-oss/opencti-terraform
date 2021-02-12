@@ -58,10 +58,12 @@ function print_banner {
 # Parameters:
 # - $1: section heading
 function log_section_heading {
+  echo
   echo "###^^^###^^^###^^^###^^^###"
   date --iso-8601=seconds
   echo $1
   echo "###^^^###^^^###^^^###^^^###"
+  echo
 }
 
 # Function: check_root
@@ -230,7 +232,7 @@ do
   esac
 done
 
-opencti_ver="4.0.5"
+opencti_ver="4.2.1"
 opencti_dir="/opt/opencti"
 opencti_worker_count=2
 

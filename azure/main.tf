@@ -12,8 +12,8 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "opencti_rg" {
-  name     = "OpenCTI"
-  location = "East US"
+  name     = "opencti_rg"
+  location = local.location
 }
 
 locals {
