@@ -58,10 +58,12 @@ function print_banner {
 # Parameters:
 # - $1: section heading
 function log_section_heading {
+  echo
   echo "###^^^###^^^###^^^###^^^###"
   date --iso-8601=seconds
   echo $1
   echo "###^^^###^^^###^^^###^^^###"
+  echo
 }
 
 # Function: check_root
@@ -114,11 +116,11 @@ function check_apt_pkg {
   if [[ $(dpkg -l | grep $1) ]]
   then
     echo >&2 "$1 found, attempting upgrade: executing apt-get -y install --only-upgrade '$1''$2'";
-    DEBIAN_FRONTEND=noninteractive apt -qq install --only-upgrade "$1""$2" > /dev/null 2>&1;
+    DEBIAN_FRONTEND=noninteractive apt -qq install --only-upgrade "$1""$2"
     quit_on_error "Upgrading $1$2"
   else
     echo >&2 "$1 missing, attempting install: executing apt-get -y install '$1''$2'";
-    DEBIAN_FRONTEND=noninteractive apt -qq -y install "$1""$2" > /dev/null 2>&1;
+    DEBIAN_FRONTEND=noninteractive apt -qq -y install "$1""$2"
     quit_on_error "Installing $1$2"
   fi
 }
@@ -306,6 +308,7 @@ sudo add-apt-repository 'deb [ arch=all ] https://repo.grakn.ai/repository/apt/ 
 update_apt_pkg
 # apt-get install -y grakn-console=2.0.0-alpha-3 # Required dependency
 # apt-get install -y grakn-core-all
+check_apt_pkg 'grakn-bin' '=2.0.0-alpha-6'
 check_apt_pkg 'grakn-core-server' "=${grakn_version}"
 check_apt_pkg 'grakn-console' "=${grakn_version}"
 check_apt_pkg 'grakn-core-all' "=${grakn_version}"
@@ -478,6 +481,7 @@ update_apt_pkg
 check_apt_pkg 'rabbitmq-server' "=${rabbitmq_ver}"
 enable_service 'rabbitmq-server'
 
+# Set RabbitMQ environment variables
 RRMQUNAME="rabbitadmin"
 
 # rabbitmq doesn't like '/'
@@ -518,6 +522,7 @@ log_section_heading "OpenCTI package installation"
 echo "OpenCTI: download tarball"
 wget --quiet -O opencti-release-${opencti_ver}.tar.gz "https://github.com/OpenCTI-Platform/opencti/releases/download/${opencti_ver}/opencti-release-${opencti_ver}.tar.gz"
 tar -xzf "opencti-release-${opencti_ver}.tar.gz" --directory "/opt/"
+rm "opencti-release-${opencti_ver}.tar.gz"
 
 echo "Changing owner of ${opencti_dir} to:" $(whoami)":"$(id -gn)
 chown -R $(whoami):$(id -gn) "${opencti_dir}"
