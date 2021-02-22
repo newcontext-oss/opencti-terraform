@@ -27,3 +27,13 @@ variable "root_volume_size" {
   type        = number
   default     = 32
 }
+
+variable "subnet_id" {
+  description = "The subnet ID to use."
+  type        = string
+}
+
+variable "vpc_id" {
+  description = "The VPC ID to use."
+  type        = string
+}

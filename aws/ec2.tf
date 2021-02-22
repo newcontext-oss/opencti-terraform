@@ -8,7 +8,7 @@ resource "aws_instance" "opencti_instance" {
   root_block_device {
     volume_size = var.root_volume_size
   }
-  subnet_id = aws_subnet.opencti_subnet.id
+  subnet_id = var.subnet_id
 
   user_data = templatefile("../userdata/installation-wrapper-script.sh", {
     login_email                    = var.login_email,

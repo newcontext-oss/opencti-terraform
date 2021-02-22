@@ -1,7 +1,7 @@
 # Security group
 resource "aws_security_group" "opencti_sg" {
   name   = "opencti_sg"
-  vpc_id = aws_vpc.opencti_vpc.id
+  vpc_id = var.vpc_id
 
   ingress {
     description = "Allow access to application on port 4000"
