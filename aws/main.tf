@@ -9,7 +9,7 @@ terraform {
   backend "s3" {
     # The bucket name is a variable defined below (as `s3_bucket`), but variables are not allowed in this block. If you change this, you will probably also want to change that.
     bucket = "opencti-storage"
-    key    = "terraform_state"
+    key    = "terraform.tfstate"
     # Again, no variable interpolation in this block so make sure this matches the region defined in `terraform.tfvars`. Default `us-east-1`.
     region = "us-east-1"
   }
