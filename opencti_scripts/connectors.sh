@@ -140,8 +140,8 @@ warn_user
 # This will only set up your instance for the connectors enabled. You must supply an API token (e.g., alienvault token) and enable the service.
 # It should be safe to run this after changing configs or enabling services.
 declare -A CONNECTORS;
-CONNECTORS['alienvault']=0 # this
-CONNECTORS['amitt']=0 # this
+CONNECTORS['alienvault']=0
+CONNECTORS['amitt']=0
 CONNECTORS['crowdstrike']=0
 CONNECTORS['cryptolaemus']=0
 CONNECTORS['cve']=1

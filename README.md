@@ -1,5 +1,5 @@
 # opencti-terraform
-This repository is here to provide you with a quick and easy way to deploy an OpenCTI instance in the cloud (currently supporting AWS and Azure; working on GCP).
+This repository is here to provide you with a quick and easy way to deploy an OpenCTI instance in the cloud (currently supporting AWS and Azure; GCP on the roadmap).
 
 If you run into any issues, please open an issue.
 
@@ -30,10 +30,10 @@ First, change into the `azure/` directory:
 cd azure/
 ```
 
-Then, you will need to login to Azure CLI and set some things. Let's do Azure login first. The purpose of this guide is to provide an easy way to evaluate if you like OpenCTI, not to start up a production instance. To that end, just run `az login` to login and be able to deploy the Terraform code. Authenticating via service principal is outside the scope of this guide.
+Then, you will need to login to Azure CLI and set some variables. Let's do Azure login first. To that end, just run `az login` to login and be able to deploy the Terraform code.
 
-Next, set the following before you can deploy:
-- ...
+Before you deploy, you may wish to change some of the settings. These are all in `azure/terraform.tfvars`:
+- `location`: The Azure region to deploy in. Default `eastus`.
 
 ## Deployment
 To see what Terraform is going to do and make sure you're cool with it, create a plan (`terraform plan`) and check it over. Once you're good to go, apply it (`terraform apply`).

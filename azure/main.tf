@@ -8,25 +8,23 @@ terraform {
 }
 
 provider "azurerm" {
+  backend "azurerm" {
+    resource_group_name = ""
+    storage_account_name = ""
+    container_name = ""
+    key = "terraform.tfstate"
+  }
+
   features {}
 }
 
 resource "azurerm_resource_group" "opencti_rg" {
   name     = "opencti_rg"
-  location = local.location
+  location = var.location
 }
 
 locals {
-  location               = "eastus"
-  # This instance size is:
-  # {
-  #   "maxDataDiskCount": 4,
-  #   "memoryInMb": 4096,
-  #   "name": "Standard_A2_v2",
-  #   "numberOfCores": 2,
-  #   "osDiskSizeInMb": 1047552,
-  #   "resourceDiskSizeInMb": 20480
-  # }
-  # To see other sizes, run `az vm list-sizes --location <location>`
-  instance_type = "Standard_A2_v2"
+  # This is an 8x16 node with 80GB SSD. The A series is meant for proof-of-concept work.
+  # OpenCTI minimum specs: https://github.com/OpenCTI-Platform/opencti/blob/5ede2579ee3c09c248d2111b483560f07d2f2c18/opencti-documentation/docs/getting-started/requirements.md
+  instance_type = "Standard_A8_v2"
 }

@@ -9,6 +9,7 @@ resource "aws_instance" "opencti" {
   iam_instance_profile        = aws_iam_instance_profile.opencti-profile.name
 
   user_data = templatefile("../userdata/installation-wrapper-script.sh", {
+    cloud                          = "aws",
     opencti_bucket_name            = local.opencti_bucket_name,
     opencti_install_email          = local.opencti_install_email,
     opencti_install_script_name    = local.opencti_install_script_name,

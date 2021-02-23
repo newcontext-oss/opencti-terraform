@@ -24,7 +24,7 @@ data "template_file" "wrapper_script" {
 # Create Ubuntu virtual machine and attach it to the virtual NIC.
 resource "azurerm_linux_virtual_machine" "opencti_vm" {
   name                  = "opencti_vm"
-  location              = local.location
+  location              = var.location
   resource_group_name   = azurerm_resource_group.opencti_rg.name
   network_interface_ids = [azurerm_network_interface.opencti_nic.id]
   size                  = local.instance_type

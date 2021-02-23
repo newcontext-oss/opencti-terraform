@@ -13,7 +13,7 @@ resource "random_id" "randomId" {
 resource "azurerm_storage_account" "opencti_storage" {
   name                     = "opencti${random_id.randomId.hex}"
   resource_group_name      = azurerm_resource_group.opencti_rg.name
-  location                 = local.location
+  location                 = var.location
   account_replication_type = "LRS"
   account_tier             = "Standard"
 

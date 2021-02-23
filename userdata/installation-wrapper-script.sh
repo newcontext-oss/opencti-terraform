@@ -8,7 +8,7 @@ echo "Update base OS"
 apt-get update
 apt-get upgrade -y
 
-if [[ ${provider} == "aws" ]]
+if [[ ${cloud} == "aws" ]]
 then
   echi "Install AWS CLI"
   apt-get install -y awscli
@@ -16,7 +16,7 @@ then
   aws s3 cp s3://${bucket_name}/${install_script_name} /opt/${install_script_name}
   echo "Copy opencti connectors script to /opt"
   aws s3 cp s3://${bucket_name}/${connectors_script_name} /opt/${connectors_script_name}
-elif [[ ${provider} == "azure" ]]
+elif [[ ${cloud} == "azure" ]]
 then
   echo "Install Azure CLI (this can take several minutes)"
   curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
