@@ -1,7 +1,12 @@
 # S3 bucket to store install and connectors scripts.
 resource "aws_s3_bucket" "opencti_bucket" {
-  bucket = local.opencti_bucket_name
+  bucket = local.s3_bucket
   acl    = "private"
+
+  # Turn on bucket versioning. We'll be storing the Terraform state in S3 and versioning will help protect against human error.
+  versioning {
+    enabled = true
+  }
 }
 
 # S3 IAM (I don't think any of these permissions are being used)
@@ -12,8 +17,8 @@ data "aws_iam_policy_document" "opencti_s3" {
     ]
 
     resources = [
-      "arn:aws:s3:::${local.opencti_bucket_name}",
-      "arn:aws:s3:::${local.opencti_bucket_name}/*",
+      "arn:aws:s3:::${local.s3_bucket}",
+      "arn:aws:s3:::${local.s3_bucket}/*",
     ]
   }
 }
