@@ -2,11 +2,11 @@
 resource "azurerm_virtual_network" "opencti_virtual_network" {
   name                = "opencti_virtual_network"
   address_space       = ["10.0.0.0/16"]
-  location            = var.location
+  location            = azurerm_resource_group.opencti_rg.location
   resource_group_name = azurerm_resource_group.opencti_rg.name
 
   tags = {
-    environment = "OpenCTI environment"
+    environment = "OpenCTI virtual network"
   }
 }
 
@@ -21,19 +21,19 @@ resource "azurerm_subnet" "opencti_subnet" {
 # Create public IP so we can access OpenCTI resources externally. The network security group (set up in `security_group.tf`) controls access to the network.
 resource "azurerm_public_ip" "opencti_public_ip" {
   name                = "opencti_public_ip"
-  location            = var.location
+  location            = azurerm_resource_group.opencti_rg.location
   resource_group_name = azurerm_resource_group.opencti_rg.name
   allocation_method   = "Dynamic"
 
   tags = {
-    environment = "OpenCTI environment"
+    environment = "OpenCTI public IP"
   }
 }
 
 # The virtual NIC connects the VM to the virtual network, public IP address, and network security group.
 resource "azurerm_network_interface" "opencti_nic" {
   name                = "opencti_nic"
-  location            = var.location
+  location            = azurerm_resource_group.opencti_rg.location
   resource_group_name = azurerm_resource_group.opencti_rg.name
 
   ip_configuration {
@@ -44,7 +44,7 @@ resource "azurerm_network_interface" "opencti_nic" {
   }
 
   tags = {
-    environment = "OpenCTI environment"
+    environment = "OpenCTI NIC"
   }
 }
 

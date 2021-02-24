@@ -116,11 +116,11 @@ function check_apt_pkg {
   if [[ $(dpkg -l | grep $1) ]]
   then
     echo >&2 "$1 found, attempting upgrade: executing apt-get -y install --only-upgrade '$1''$2'";
-    DEBIAN_FRONTEND=noninteractive apt -qq install --only-upgrade "$1""$2"
+    DEBIAN_FRONTEND=noninteractive apt-get install --only-upgrade "$1""$2"
     quit_on_error "Upgrading $1$2"
   else
     echo >&2 "$1 missing, attempting install: executing apt-get -y install '$1''$2'";
-    DEBIAN_FRONTEND=noninteractive apt -qq -y install "$1""$2"
+    DEBIAN_FRONTEND=noninteractive apt-get -y install "$1""$2"
     quit_on_error "Installing $1$2"
   fi
 }

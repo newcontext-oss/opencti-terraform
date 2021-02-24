@@ -33,7 +33,11 @@ cd azure/
 Then, you will need to login to Azure CLI and set some variables. Let's do Azure login first. To that end, just run `az login` to login and be able to deploy the Terraform code.
 
 Before you deploy, you may wish to change some of the settings. These are all in `azure/terraform.tfvars`:
+- `account_name`: The Azure account name. No default; this must be set.
+- `admin_user`: The name of the admin user on the VM. Default `azureuser`
 - `location`: The Azure region to deploy in. Default `eastus`.
+- `login_email`: The e-mail address used to login to the OpenCTI web frontend. Default `login.email@example.com`.
+- `os_disk_size`: The VM's disk size (in GB). Default `32` (the (minimum recommended spec)[https://github.com/OpenCTI-Platform/opencti/blob/5ede2579ee3c09c248d2111b483560f07d2f2c18/opencti-documentation/docs/getting-started/requirements.md]).
 
 ## Deployment
 To see what Terraform is going to do and make sure you're cool with it, create a plan (`terraform plan`) and check it over. Once you're good to go, apply it (`terraform apply`).
@@ -45,18 +49,18 @@ tail -F /var/log/user-data.log
 ```
 
 ### Azure
-To login, run the following commands. These will remove the old SSH key, put the new one in place, fix the permissions, and print the login command:
+To login, run the following commands. These commands will remove the old SSH key, put the new one in place, fix its permissions, and SSH into the VM:
 ```
 rm -f ~/.ssh/azureuser
 cat terraform.tfstate | jq '.outputs.tls_private_key.value' | sed 's/"//g' | awk '{ gsub(/\\\\n/,"\\n") }1' > ~/.ssh/azureuser
 chmod 400 ~/.ssh/azureuser
-ssh -i ~/.ssh/azureuser azureuser@$(az vm show --resource-group OpenCTI --name opencti_vm -d --query [publicIps] -o tsv)
+ssh -i ~/.ssh/azureuser azureuser@$(az vm show --resource-group opencti_rg --name opencti -d --query [publicIps] -o tsv)
 ```
 
 ## Post-deployment
-Once the installation is complete, you'll want to grab the admin password that was generated. The username is the e-mail you provided in `main.tf` above. Get the password with:
+Once the installation is complete, you'll want to grab the admin password that was generated. The username is the e-mail you provided in `terraform.tfvars`. Get the password by running the following on the VM:
 ```
 cat /opt/opencti/config/production.json | jq '.app.admin.password'
 ```
 
-Next, go to port 4000 of the public IP of the machine (found in the AWS console) and this will bring you to the OpenCTI login for that machine. If it does not, check the ingress rule in `security_group_tf`.
+Next, go to port 4000 of the public IP of the machine and login with the credentials you just grabbed.
