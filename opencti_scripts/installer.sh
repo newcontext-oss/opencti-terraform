@@ -265,6 +265,9 @@ disable_service 'rabbitmq-server'
 disable_service 'minio'
 disable_service 'grakn'
 
+# The VMs we're running are not that big and we're going to quickly fill the system log with our work (and especially the connectors). This will max out the logs at 100M.
+echo "SystemMaxUse=100M" >> /etc/systemd/journald.conf
+
 # Ensure required packages are installed at latest (or specified) version. Repositories were updated in the wrapper script.
 log_section_heading "Installing and updating required packages"
 update_apt_pkg
@@ -332,6 +335,21 @@ enable_service 'grakn'
 
 ## Elasticsearch
 log_section_heading "Elasticsearch"
+echo "Setting up logrotate for Elasticsearch"
+# rotate 20 logs at 50M means a maximum of 1GB Elasticsearch logs.
+cat <<EOT > /etc/logrotate.d/elasticsearch
+/var/log/elasticsearch/*.log {
+  daily
+  rotate 20
+  size 50M
+  copytruncate
+  compress
+  delaycompress
+  missingok
+  notifempty
+  create 644 elasticsearch elasticsearch
+}
+EOT
 wget -qO - 'https://artifacts.elastic.co/GPG-KEY-elasticsearch' | apt-key add -
 add-apt-repository "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
 update_apt_pkg
@@ -466,6 +484,7 @@ update_apt_pkg
 check_apt_pkg 'rabbitmq-server' "=${rabbitmq_ver}"
 enable_service 'rabbitmq-server'
 
+# Set RabbitMQ environment variables
 RRMQUNAME="rabbitadmin"
 
 # rabbitmq doesn't like '/'
@@ -506,6 +525,7 @@ log_section_heading "OpenCTI package installation"
 echo "OpenCTI: download tarball"
 wget --quiet -O opencti-release-${opencti_ver}.tar.gz "https://github.com/OpenCTI-Platform/opencti/releases/download/${opencti_ver}/opencti-release-${opencti_ver}.tar.gz"
 tar -xzf "opencti-release-${opencti_ver}.tar.gz" --directory "/opt/"
+rm "opencti-release-${opencti_ver}.tar.gz"
 
 echo "Changing owner of ${opencti_dir} to:" $(whoami)":"$(id -gn)
 chown -R $(whoami):$(id -gn) "${opencti_dir}"

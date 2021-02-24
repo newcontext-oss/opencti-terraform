@@ -1,17 +1,18 @@
 # Security group
-resource "aws_security_group" "opencti" {
-  name   = "opencti"
-  vpc_id = local.vpc_id
+resource "aws_security_group" "opencti_sg" {
+  name   = "opencti_sg"
+  vpc_id = var.vpc_id
 
   ingress {
-    description = "Allow access from these IPs"
+    description = "Allow access to application on port 4000"
     from_port   = 4000
     to_port     = 4000
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/32"] # change (can be comma delimited)
+    cidr_blocks = var.allowed_ips_application
   }
 
   egress {
+    description = "Application can send outbound traffic to these IPs"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -19,6 +20,6 @@ resource "aws_security_group" "opencti" {
   }
 
   tags = {
-    Name = "opencti"
+    Name = "opencti security group"
   }
 }

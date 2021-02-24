@@ -12,17 +12,14 @@ First, change into the `aws/` directory:
 cd aws/
 ```
 
-Then, there are a few things you will need to configure before you can run Terraform:
-- Edit `main.tf`:
-  - (optional) Edit the AWS region (default is `us-east-1`).
-  - Make sure your AWS credentials are in place and edit the path to them.
-  - Edit the login e-mail (`opencti_install_email`).
-  - Edit the `vpc_id`.
-  - Edit the `subnet_id`
-- In `security_group.tf`:
-  - Add your public-facing IP address to the ingress rules (this can be a comma-separated list).
-- (optional) In `ec2.tf`:
-  - Edit the instance's tag `Name` (the default is "opencti").
+Before you get going, there are a some variables you will probably want to set. All of these can be found in `aws/terraform.tfvars`:
+- `allowed_ips_application`: Array containing each of the IPs that are allowed to access the web application. Default `0.0.0.0/0` all IPs.
+- `availability_zone`: The AWS availability zone. Default `us-east-1a`.
+- `login_email`: The e-mail address used to login to the application. Default `login.email@example.com`.
+- `region`: The AWS region used. Default `us-east`.
+- `root_volume_size`: The root volume size for the EC2 instance. Without this, the volume is 7.7GB and fills up in a day. Default `32` (GB). Note that this will incur costs.
+- `subnet_id`: The AWS subnet to use. No default specified.
+- `vpc_id`: The VPC to use. No default specified.
 
 ### Azure
 First, change into the `azure/` directory:
