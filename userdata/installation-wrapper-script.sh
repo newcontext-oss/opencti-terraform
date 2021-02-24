@@ -16,7 +16,7 @@ aws s3 cp s3://${opencti_bucket_name}/${opencti_install_script_name} /opt/${open
 chmod +x /opt/${opencti_install_script_name}
 echo "Starting OpenCTI installation script"
 # Run the install script with the provided e-mail address (from main.tf)
-/opt/${opencti_install_script_name} -e "${opencti_install_email}"
+/opt/${opencti_install_script_name} -e "${login_email}"
 
 echo "OpenCTI installation script complete."
 
