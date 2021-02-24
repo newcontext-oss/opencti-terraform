@@ -11,6 +11,7 @@ resource "aws_instance" "opencti_instance" {
   subnet_id = var.subnet_id
 
   user_data = templatefile("../userdata/installation-wrapper-script.sh", {
+    cloud                          = "aws",
     login_email                    = var.login_email,
     opencti_bucket_name            = local.s3_bucket,
     opencti_dir                    = local.opencti_dir,
