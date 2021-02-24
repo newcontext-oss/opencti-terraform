@@ -13,7 +13,7 @@ resource "aws_instance" "opencti_instance" {
   user_data = templatefile("../userdata/installation-wrapper-script.sh", {
     cloud                          = "aws",
     login_email                    = var.login_email,
-    opencti_bucket_name            = local.opencti_bucket_name,
+    opencti_bucket_name            = local.s3_bucket,
     opencti_dir                    = local.opencti_dir,
     opencti_install_script_name    = local.opencti_install_script_name,
     opencti_connectors_script_name = local.opencti_connectors_script_name
