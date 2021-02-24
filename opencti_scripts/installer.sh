@@ -116,11 +116,11 @@ function check_apt_pkg {
   if [[ $(dpkg -l | grep $1) ]]
   then
     echo >&2 "$1 found, attempting upgrade: executing apt-get -y install --only-upgrade '$1''$2'";
-    DEBIAN_FRONTEND=noninteractive apt -qq install --only-upgrade "$1""$2"
+    DEBIAN_FRONTEND=noninteractive apt-get install --only-upgrade "$1""$2"
     quit_on_error "Upgrading $1$2"
   else
     echo >&2 "$1 missing, attempting install: executing apt-get -y install '$1''$2'";
-    DEBIAN_FRONTEND=noninteractive apt -qq -y install "$1""$2"
+    DEBIAN_FRONTEND=noninteractive apt-get -y install "$1""$2"
     quit_on_error "Installing $1$2"
   fi
 }
@@ -203,7 +203,10 @@ else
 fi
 
 # Grakn
-grakn_version="2.0.0-alpha-4"
+grakn_bin_version="2.0.0-alpha-6"
+grakn_console_version="2.0.0-alpha-4"
+grakn_core_all_version="2.0.0-alpha-4"
+grakn_core_server_version="2.0.0-alpha-4"
 
 # Minio
 minio_dir="/opt/minio/data"
@@ -229,7 +232,7 @@ do
   esac
 done
 
-opencti_ver="4.0.5"
+opencti_ver="4.2.1"
 opencti_dir="/opt/opencti"
 opencti_worker_count=2
 
@@ -308,10 +311,10 @@ sudo add-apt-repository 'deb [ arch=all ] https://repo.grakn.ai/repository/apt/ 
 update_apt_pkg
 # apt-get install -y grakn-console=2.0.0-alpha-3 # Required dependency
 # apt-get install -y grakn-core-all
-check_apt_pkg 'grakn-bin' '=2.0.0-alpha-6'
-check_apt_pkg 'grakn-core-server' "=${grakn_version}"
-check_apt_pkg 'grakn-console' "=${grakn_version}"
-check_apt_pkg 'grakn-core-all' "=${grakn_version}"
+check_apt_pkg 'grakn-bin' "=${grakn_bin_version}"
+check_apt_pkg 'grakn-core-server' "=${grakn_core_server_version}"
+check_apt_pkg 'grakn-console' "=${grakn_console_version}"
+check_apt_pkg 'grakn-core-all' "=${grakn_core_all_version}"
 
 ### Create systemd unit file for Grakn
 cat <<EOT > /etc/systemd/system/grakn.service
