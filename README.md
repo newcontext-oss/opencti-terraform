@@ -4,7 +4,7 @@ This repository is here to provide you with a quick and easy way to deploy an Op
 If you run into any issues, please open an issue.
 
 ## Before you deploy
-There is currently no simple way to tell Terraform to deploy to one cloud or another. Should that feature ever become available, the code will be restructured accordingly. In the meantime, if you would like to deploy to a cloud, you will need to first change into the `aws/` or `azure/` directory _before_ you run `terraform init`. The following sections will bring you through the entire process and outline the various settings you will need to set before you can deploy.
+This repository currently supports deploying into AWS and Azure (GCP forthcoming). You will need to first change into the `aws/` or `azure/` directory _before_ you run `terraform init`. The following sections will bring you through the entire process and outline the various settings you will need to set before you can deploy.
 
 ### AWS
 First, change into the `aws/` directory:
