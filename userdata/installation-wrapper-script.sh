@@ -24,6 +24,9 @@ then
   az storage blob download --account-name "${account_name}" --container-name "${container_name}" --name "${install_script_name}" --file /opt/"${install_script_name}" --connection-string "${connection_string}"
   echo "Copy opencti connectors script to /opt"
   az storage blob download --account-name "${account_name}" --container-name "${container_name}" --name "${connectors_script_name}" --file /opt/"${connectors_script_name}" --connection-string "${connection_string}"
+elif [[ ${cloud} == "gcp" ]]
+then
+  # stuff
 fi
 
 echo "Make scripts executable"
