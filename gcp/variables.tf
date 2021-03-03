@@ -1,12 +1,18 @@
-variable "credentials" {
-  description = "Path to the service account key file."
-  type        = string
-}
+# variable "credentials" {
+#   description = "Path to the service account key file."
+#   type        = string
+# }
 
 variable "disk_size" {
   description = "The disk size (in GB) for the instance."
   type        = number
   default     = 32
+}
+
+variable "login_email" {
+  description = "The email used to login to the OpenCTI web page."
+  type        = string
+  default     = "login.email@example.com"
 }
 
 variable "machine_type" {

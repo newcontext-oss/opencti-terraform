@@ -45,10 +45,13 @@ Change into the `gcp/` directory:
 cd gcp/
 ```
 
-You will need to create a new project in GCP and set up billing. Note the project ID because you will need it in a minute. Then, set up a service account and download the service account key.
+You will need to create a new project in GCP and set up billing. Note the project ID because you will need it in a minute. Then, set up a service account with the following roles and download the service account key:
+- Security Admin
+- Owner
+- Storage Admin
 
 The following items can be set in `terraform.tfvars`:
-- `credentials`: The path to your service account key file. No default.
+- `credentials`: ~~The path to your service account key file. No default.~~ This isn't working. Sorry. You will need to manually edit the credentials file path in `main.tf`.
 - `disk_size`: The disk size (in GB) for the instance. Default `32`. [OpenCTI minimum specs](https://github.com/OpenCTI-Platform/opencti/blob/5ede2579ee3c09c248d2111b483560f07d2f2c18/opencti-documentation/docs/getting-started/requirements.md) is 32GB drive.
 - `machine_type`: The GCE machine type to use. Default `e2-standard-8`. [OpenCTI minimum specs](https://github.com/OpenCTI-Platform/opencti/blob/5ede2579ee3c09c248d2111b483560f07d2f2c18/opencti-documentation/docs/getting-started/requirements.md) is 8x16. The default size is 8x32.
 - `project_id`: The Google Cloud project ID. No default.
@@ -72,6 +75,9 @@ cat terraform.tfstate | jq '.outputs.tls_private_key.value' | sed 's/"//g' | awk
 chmod 400 ~/.ssh/azureuser
 ssh -i ~/.ssh/azureuser azureuser@$(az vm show --resource-group opencti_rg --name opencti -d --query [publicIps] -o tsv)
 ```
+
+### GCP
+The apply will probably fail because the APIs (Compute Engine, IAM, etc.) are being activated. If it errors out because of the APIs, wait a few minutes and re-run `terraform apply`.
 
 ## Post-deployment
 Once the installation is complete, you'll want to grab the admin password that was generated. The username is the e-mail you provided in `terraform.tfvars`. Get the password by running the following on the VM:
