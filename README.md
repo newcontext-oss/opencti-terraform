@@ -15,9 +15,11 @@ cd aws/
 Before you get going, there are a some variables you will probably want to set. All of these can be found in `aws/terraform.tfvars`:
 - `allowed_ips_application`: Array containing each of the IPs that are allowed to access the web application. Default `0.0.0.0/0` all IPs.
 - `availability_zone`: The AWS availability zone. Default `us-east-1a`.
+- `instance_type`: The AWS instance type to use. Default `t3.2xlarge` (8x32).
 - `login_email`: The e-mail address used to login to the application. Default `login.email@example.com`.
 - `region`: The AWS region used. Default `us-east`. **NOTE:** if you change this, you will need to change the remote state region in `aws/main.tf`. Variable interpolation is not allowed in that block so it has to be hardcoded.
 - `root_volume_size`: The root volume size for the EC2 instance. Without this, the volume is 7.7GB and fills up in a day. Default `32` (GB). Note that this will incur costs.
+- `storage_bucket`: The name of the S3 bucket to store scripts and remote state in. Default `opencti-storage`.
 - `subnet_id`: The AWS subnet to use. No default specified.
 - `vpc_id`: The VPC to use. No default specified.
 
@@ -25,11 +27,11 @@ If your AWS credentials are not stored in `~/.aws/credentials`, you will need to
 
 #### Remote state
 The remote state is defined in `aws/main.tf`. Variable interpolation is not allowed in that block and the easiest choice (both for writing the code and for you using the code) was to pick sensible defaults and hardcode them. The variables are:
-- `bucket`: The name of the S3 bucket to store the state file in. Default `opencti-storage`.
 - `key`: The name of the state file. Default `terraform_state`.
 - `region`: The region to use. Default `us-east-1`.
+- `storage_bucket`: The name of the S3 bucket to store the state file in. Default `opencti-storage`.
 
-This is mentioned as an FYI for the end user, but if you change the region in `aws/terraform.tfvars`, you will want to change the region here, too. If you want to change the S3 bucket name (defined as a local variable in `aws/main.tf`), you will also want to change it here.
+**Important:** If you change the region in `aws/terraform.tfvars`, you will want to change the region here, too. If you want to change the S3 bucket name (defined in `aws/terraform.tfvars`), you will also want to change it here.
 
 ### Azure
 First, change into the `azure/` directory:
@@ -45,6 +47,7 @@ Before you deploy, you may wish to change some of the settings. These are all in
 - `location`: The Azure region to deploy in. Default `eastus`.
 - `login_email`: The e-mail address used to login to the OpenCTI web frontend. Default `login.email@example.com`.
 - `os_disk_size`: The VM's disk size (in GB). Default `32` (the [minimum recommended spec](https://github.com/OpenCTI-Platform/opencti/blob/5ede2579ee3c09c248d2111b483560f07d2f2c18/opencti-documentation/docs/getting-started/requirements.md)).
+- `storage_bucket`: Name of the storage bucket for storing scripts. Default `opencti-storage`.
 
 ### GCP
 Change into the `gcp/` directory:

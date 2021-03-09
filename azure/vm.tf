@@ -9,16 +9,15 @@ output "tls_private_key" { value = tls_private_key.ssh_private_key.private_key_p
 # Bootstrap deployment with wrapper script.
 data "template_file" "wrapper_script" {
   template = file("../userdata/installation-wrapper-script.sh")
+  # The wrapper script is used by each of the providers and each variable has to be filled out in order to run. Unfortunately, this means that if you change something in one provider, you have to change it in each of the others. It's not ideal, but FYI.
   vars = {
-    "account_name" = var.account_name
-    "bucket_name"  = "only for aws"
-    # The wrapper script is used for multiple clouds. This defines this cloud.
+    "account_name"           = var.account_name
     "cloud"                  = "azure"
     "connection_string"      = azurerm_storage_account.opencti_storage.primary_connection_string
     "connectors_script_name" = "opencti-connectors.sh"
-    "container_name"         = azurerm_storage_container.opencti-storage-container.name
     "install_script_name"    = "opencti-installer.sh"
     "login_email"            = var.login_email
+    "storage_bucket"         = azurerm_storage_container.opencti-storage-container.name
   }
 }
 

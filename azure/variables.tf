@@ -26,3 +26,9 @@ variable "os_disk_size" {
   type        = number
   default     = 32
 }
+
+variable "storage_bucket" {
+  description = "Name of the storage bucket."
+  type        = string
+  default     = "opencti"
+}

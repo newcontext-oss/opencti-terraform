@@ -32,6 +32,12 @@ variable "region" {
   default     = "us-east1"
 }
 
+variable "storage_bucket" {
+  description = "Name of the storage bucket."
+  type        = string
+  default     = "opencti-storage"
+}
+
 variable "zone" {
   description = "The Google Cloud zone to run the instance in."
   type        = string
