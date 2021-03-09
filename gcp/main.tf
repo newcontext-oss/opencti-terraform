@@ -1,7 +1,6 @@
 # Configure Google Cloud provider
 provider "google" {
-  # credentials = file("${var.credentials}") # not working
-  credentials = file("/path/to/key.json")
+  credentials = file(var.credentials)
   project     = var.project_id
   region      = var.region
 }

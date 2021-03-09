@@ -1,6 +1,6 @@
-# credentials = "Not working. Sorry. Manually edit in main.tf"
+credentials = ""
 # disk_size = 32
-# login_email = "login.email@example.com"
+login_email = "login.email@example.com"
 # machine_type = "e2-standard-8"
 project_id = ""
 # region = "us-east1"

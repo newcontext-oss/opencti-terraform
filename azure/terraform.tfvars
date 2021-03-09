@@ -1,4 +1,4 @@
-account_name = "Pay-As-You-Go"
+account_name = ""
 # admin_user = "azureuser"
 # location = "eastus"
 login_email = "login.email@example.com"
