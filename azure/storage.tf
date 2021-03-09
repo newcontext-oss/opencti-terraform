@@ -1,17 +1,6 @@
-# Storage for boot diagnostics.
-# Each storage account must have a unique name:
-resource "random_id" "randomId" {
-  keepers = {
-    # Generate a new ID only when a new resource group is defined
-    resource_group = azurerm_resource_group.opencti_rg.name
-  }
-
-  byte_length = 8
-}
-
-# Create storage account (the name is based on the above randomId). The default storage type is StorageV2: https://docs.microsoft.com/en-us/azure/storage/common/storage-account-overview
+# Create storage account. The default storage type is StorageV2: https://docs.microsoft.com/en-us/azure/storage/common/storage-account-overview
 resource "azurerm_storage_account" "opencti_storage" {
-  name                     = "opencti${random_id.randomId.hex}"
+  name                     = var.storage_bucket
   resource_group_name      = azurerm_resource_group.opencti_rg.name
   location                 = var.location
   account_replication_type = "LRS"

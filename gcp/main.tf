@@ -25,7 +25,6 @@ resource "google_project_service" "iam_api" {
 }
 
 locals {
-  bucket_name            = "opencti"
   connectors_script_name = "opencti-connectors.sh"
   install_script_name    = "opencti-installer.sh"
 }

@@ -1,16 +1,15 @@
 # Startup script template
 data "template_file" "startup_script" {
   template = file("../userdata/installation-wrapper-script.sh")
+  # The wrapper script is used by each of the providers and each variable has to be filled out in order to run. Unfortunately, this means that if you change something in one provider, you have to change it in each of the others. It's not ideal, but FYI.
   vars = {
-    "account_name" = "only for azure"
-    "bucket_name"  = local.bucket_name
-    # The wrapper script is used for multiple clouds. This defines this cloud.
+    "account_name"           = "only for azure"
     "cloud"                  = "gcp"
     "connection_string"      = "only for azure"
     "connectors_script_name" = "opencti-connectors.sh"
-    "container_name"         = "only for azure"
     "install_script_name"    = "opencti-installer.sh"
     "login_email"            = var.login_email
+    "storage_bucket"         = var.storage_bucket
   }
 }
 
@@ -41,6 +40,6 @@ resource "google_compute_instance" "opencti_instance" {
   service_account {
     email = google_service_account.storage.email
     # Scopes are outlined here: https://cloud.google.com/sdk/gcloud/reference/alpha/compute/instances/set-scopes#--scopes
-    scopes = [ "cloud-platform", "storage-ro" ]
+    scopes = ["cloud-platform", "storage-ro"]
   }
 }

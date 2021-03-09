@@ -10,6 +10,12 @@ variable "availability_zone" {
   default     = "us-east-1a"
 }
 
+variable "instance_type" {
+  description = "Instance type to use. Default is 8x32."
+  type        = string
+  default     = "t3.2xlarge"
+}
+
 variable "login_email" {
   description = "The e-mail address to use for logging into the OpenCTI instance."
   type        = string
@@ -26,6 +32,12 @@ variable "root_volume_size" {
   description = "The size of the root volume."
   type        = number
   default     = 32
+}
+
+variable "storage_bucket" {
+  description = "The name of the S3 storage bucket to store scripts and remote state in."
+  type        = string
+  default     = "opencti-storage"
 }
 
 variable "subnet_id" {
