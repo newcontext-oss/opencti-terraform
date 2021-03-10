@@ -1,7 +1,7 @@
-# variable "credentials" {
-#   description = "Path to the service account key file."
-#   type        = string
-# }
+variable "credentials" {
+  description = "Path to the service account key file."
+  type        = string
+}
 
 variable "disk_size" {
   description = "The disk size (in GB) for the instance."

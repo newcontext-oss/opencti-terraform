@@ -61,7 +61,7 @@ You will need to create a new project in GCP and set up billing. Note the projec
 - Storage Admin
 
 The following items can be set in `terraform.tfvars`:
-- `credentials`: ~~The path to your service account key file. No default.~~ This isn't working. Sorry. You will need to manually edit the credentials file path in `main.tf`.
+- `credentials`: The path to your service account key file. Please make sure it has the permissions listed above. No default.
 - `disk_size`: The disk size (in GB) for the instance. Default `32`. [OpenCTI minimum specs](https://github.com/OpenCTI-Platform/opencti/blob/5ede2579ee3c09c248d2111b483560f07d2f2c18/opencti-documentation/docs/getting-started/requirements.md) is 32GB drive.
 - `machine_type`: The GCE machine type to use. Default `e2-standard-8`. [OpenCTI minimum specs](https://github.com/OpenCTI-Platform/opencti/blob/5ede2579ee3c09c248d2111b483560f07d2f2c18/opencti-documentation/docs/getting-started/requirements.md) is 8x16. The default size is 8x32.
 - `project_id`: The Google Cloud project ID. No default.
