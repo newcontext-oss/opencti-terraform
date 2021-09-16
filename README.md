@@ -31,7 +31,11 @@ The remote state is defined in `aws/main.tf`. Variable interpolation is not allo
 - `region`: The region to use. Default `us-east-1`.
 - `storage_bucket`: The name of the S3 bucket to store the state file in. Default `opencti-storage`.
 
-**Important:** If you change the region in `aws/terraform.tfvars`, you will want to change the region here, too. If you want to change the S3 bucket name (defined in `aws/terraform.tfvars`), you will also want to change it here.
+**Important:**
+
+If you change the region in `aws/terraform.tfvars`, you will want to change the region here, too. Also, when changing the region you will need to update the ami_id in main.tf to the correct ID for the Ubuntu 20.04 LTS 64-bit x86 in your chosen region.
+
+If you want to change the S3 bucket name (defined in `aws/terraform.tfvars`), you will also want to change it here.
 
 ### Azure
 First, change into the `azure/` directory:
