@@ -476,7 +476,6 @@ update_apt_pkg
 
 # Use the script from CloudSmith to install latest version of RabbitMQ
 curl -1sLf 'https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/setup.deb.sh' | sudo -E bash
-EOT
 
 check_apt_pkg 'rabbitmq-server' "=${rabbitmq_ver}"
 enable_service 'rabbitmq-server'
