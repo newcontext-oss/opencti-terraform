@@ -61,7 +61,7 @@ function log_section_heading {
   echo
   echo "###^^^###^^^###^^^###^^^###"
   date --iso-8601=seconds
-  echo $1
+  echo "$1"
   echo "###^^^###^^^###^^^###^^^###"
   echo
 }
@@ -192,7 +192,7 @@ ubuntu_version=$(grep "Ubuntu " /etc/lsb-release | cut -d" " -f2 | cut -d\. -f1)
 if [[ ${ubuntu_version} == 18 ]]
 then
   distro="bionic"
-  run_python="python3.7"
+  run_python="python3.8"
 elif [[ ${ubuntu_version} == 20 ]]
 then
   # Using bionic since focal not avaialble yet for RabbitMQ
@@ -212,7 +212,7 @@ grakn_core_server_version="2.0.0-alpha-4"
 minio_dir="/opt/minio/data"
 
 # Redis
-redis_ver="6.0.5"
+redis_ver="6.2.5"
 
 # RabbitMQ
 rabbitmq_ver="3.8.5-1"
@@ -232,7 +232,7 @@ do
   esac
 done
 
-opencti_ver="4.2.1"
+opencti_ver="5.0.0"
 opencti_dir="/opt/opencti"
 opencti_worker_count=2
 
