@@ -15,9 +15,17 @@ terraform {
   }
 }
 
+data "aws_ami" "ubuntu_server" {
+  owners = ["099720109477"]
+  filter {
+    name = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20210119.1"]
+  }
+}
+
 # These variables aren't meant to be changed by the end user.
 locals {
-  ami_id                         = "ami-0074ee617a234808d" # Ubuntu 20.04 LTS
+  ami_id                         = data.aws_ami.ubuntu_server.id
   opencti_dir                    = "/opt/opencti"
   opencti_install_script_name    = "opencti-installer.sh"
   opencti_connectors_script_name = "opencti-connectors.sh"
