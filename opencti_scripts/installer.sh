@@ -192,7 +192,7 @@ ubuntu_version=$(grep "Ubuntu " /etc/lsb-release | cut -d" " -f2 | cut -d\. -f1)
 if [[ ${ubuntu_version} == 18 ]]
 then
   distro="bionic"
-  run_python="python3.7"
+  run_python="python3.8"
 elif [[ ${ubuntu_version} == 20 ]]
 then
   # Using bionic since focal not avaialble yet for RabbitMQ
