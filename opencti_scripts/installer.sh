@@ -215,8 +215,7 @@ minio_dir="/opt/minio/data"
 redis_ver="6.0.5"
 
 # RabbitMQ
-rabbitmq_ver="3.8.5-1"
-rabbitmq_release_url="https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc"
+rabbitmq_ver="3.9.5-1"
 
 # OpenCTI
 # This has to be in email address format, otherwise the opencti-server service will freak out and not start correctly. - KTW
@@ -470,17 +469,15 @@ enable_service 'redis-server'
 
 ## RabbitMQ
 log_section_heading "RabbitMQ"
-curl -fsSL "${rabbitmq_release_url}" | apt-key add -
-tee /etc/apt/sources.list.d/bintray.rabbitmq.list <<EOT
-## Installs the latest Erlang 22.x release.
-## Change component to "erlang-21.x" to install the latest 21.x version.
-## "bionic" as distribution name should work for any later Ubuntu or Debian release.
-## See the release to distribution mapping table in RabbitMQ doc guides to learn more.
-deb [trusted=yes] https://dl.bintray.com/rabbitmq-erlang/debian ${distro} erlang
-deb [trusted=yes] https://dl.bintray.com/rabbitmq/debian ${distro} main
+# Setup packages for erlang
+wget -O- https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc | sudo apt-key add -
+echo "deb https://packages.erlang-solutions.com/ubuntu focal contrib" | sudo tee /etc/apt/sources.list.d/rabbitmq.list
+update_apt_pkg
+
+# Use the script from CloudSmith to install latest version of RabbitMQ
+curl -1sLf 'https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/setup.deb.sh' | sudo -E bash
 EOT
 
-update_apt_pkg
 check_apt_pkg 'rabbitmq-server' "=${rabbitmq_ver}"
 enable_service 'rabbitmq-server'
 
