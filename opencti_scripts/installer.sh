@@ -212,7 +212,7 @@ typedb_core_server_version="2.11.0"
 minio_dir="/opt/minio/data"
 
 # Redis
-redis_ver="6.0.5"
+redis_ver="7.0.2"
 
 # RabbitMQ
 rabbitmq_ver="3.8.34-1"
@@ -436,7 +436,7 @@ fi
 if [[ ! -f "/etc/redis/redis.conf" ]]
 then
   cp "redis-${redis_ver}/redis.conf" "/etc/redis/redis.conf"
-  sed -i 's/^supervised no/supervised systemd/' "/etc/redis/redis.conf"
+  sed -i 's/^\#\ supervised\ .*$/supervised auto/' "/etc/redis/redis.conf"
   chown redis:redis "/etc/redis/redis.conf"
 fi
 
