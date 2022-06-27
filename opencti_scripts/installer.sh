@@ -126,7 +126,7 @@ function check_apt_pkg {
 }
 
 # Function: check_service
-# Checks if a service is active or nah. Matches Grakn service output.
+# Checks if a service is active or nah. Matches TypeDB service output.
 # Parameters:
 # - $1: service to check
 function check_service {
@@ -202,11 +202,11 @@ else
   quit_on_error echo "You are using an unsupported version of Ubuntu. Exiting."
 fi
 
-# Grakn
-grakn_bin_version="2.0.0-alpha-6"
-grakn_console_version="2.0.0-alpha-4"
-grakn_core_all_version="2.0.0-alpha-4"
-grakn_core_server_version="2.0.0-alpha-4"
+# TypeDB
+typedb_bin_version="2.11.0"
+typedb_console_version="2.11.0"
+typedb_core_all_version="2.11.0"
+typedb_core_server_version="2.11.0"
 
 # Minio
 minio_dir="/opt/minio/data"
@@ -263,7 +263,7 @@ disable_service 'elasticsearch'
 disable_service 'redis-server'
 disable_service 'rabbitmq-server'
 disable_service 'minio'
-disable_service 'grakn'
+disable_service 'typedb'
 
 # The VMs we're running are not that big and we're going to quickly fill the system log with our work (and especially the connectors). This will max out the logs at 100M.
 echo "SystemMaxUse=100M" >> /etc/systemd/journald.conf
@@ -304,34 +304,34 @@ check_apt_pkg "python3-pip"
 ${run_python} -m pip install --upgrade pip
 ${run_python} -m pip -q install --ignore-installed PyYAML
 
-## Grakn
-log_section_heading "Grakn"
+## TypeDB
+log_section_heading "TypeDB"
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 8F3DA4B5E9AEF44C
-sudo add-apt-repository 'deb [ arch=all ] https://repo.grakn.ai/repository/apt/ trusty main'
+sudo add-apt-repository 'deb [ arch=all ] https://repo.vaticle.com/repository/apt/ trusty main'
 update_apt_pkg
 # apt-get install -y grakn-console=2.0.0-alpha-3 # Required dependency
 # apt-get install -y grakn-core-all
-check_apt_pkg 'grakn-bin' "=${grakn_bin_version}"
-check_apt_pkg 'grakn-core-server' "=${grakn_core_server_version}"
-check_apt_pkg 'grakn-console' "=${grakn_console_version}"
-check_apt_pkg 'grakn-core-all' "=${grakn_core_all_version}"
+# check_apt_pkg 'grakn-bin' "=${grakn_bin_version}"
+# check_apt_pkg 'grakn-core-server' "=${grakn_core_server_version}"
+# check_apt_pkg 'grakn-console' "=${grakn_console_version}"
+check_apt_pkg 'typedb-all' "=${typedb_core_all_version}"
 
-### Create systemd unit file for Grakn
-cat <<EOT > /etc/systemd/system/grakn.service
+### Create systemd unit file for TypeDB
+cat <<EOT > /etc/systemd/system/typedb.service
 [Unit]
-Description=Grakn.AI Server daemon
+Description=TypeDB Server daemon
 After=network.target
 [Service]
-Type=forking
-ExecStart=/usr/local/bin/grakn server start
-ExecStop=/usr/local/bin/grakn server stop
-ExecReload=/usr/local/bin/grakn server stop && /usr/local/bin/grakn server start
-RemainAfterExit=yes
+Type=simple
+ExecStart=/usr/local/bin/typedb server
+#ExecStop=/usr/local/bin/typedb server stop
+#ExecReload=/usr/local/bin/typedb server stop && /usr/local/bin/typedb server start
+#RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
 EOT
 systemctl daemon-reload
-enable_service 'grakn'
+enable_service 'typedb'
 
 ## Elasticsearch
 log_section_heading "Elasticsearch"
@@ -514,7 +514,7 @@ echo -e "${RMQ_user_list}"
 # Check status of services
 log_section_heading "Checking service statuses"
 check_service 'elasticsearch'
-check_service 'grakn'
+check_service 'typedb'
 check_service 'minio'
 check_service 'rabbitmq-server'
 check_service 'redis-server'
