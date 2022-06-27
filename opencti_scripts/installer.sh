@@ -215,7 +215,7 @@ minio_dir="/opt/minio/data"
 redis_ver="6.0.5"
 
 # RabbitMQ
-rabbitmq_ver="3.8.5-1"
+rabbitmq_ver="3.8.34-1"
 rabbitmq_release_url="https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc"
 
 # OpenCTI
@@ -471,13 +471,23 @@ enable_service 'redis-server'
 ## RabbitMQ
 log_section_heading "RabbitMQ"
 curl -fsSL "${rabbitmq_release_url}" | apt-key add -
-tee /etc/apt/sources.list.d/bintray.rabbitmq.list <<EOT
+curl -fsSL https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey | sudo gpg --dearmor | sudo tee /usr/share/keyrings/rabbitmq_rabbitmq-server-archive-keyring.gpg
+curl -1sLf "https://keys.openpgp.org/vks/v1/by-fingerprint/0A9AF2115F4687BD29803A206B73A36E6026DFCA" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/com.rabbitmq.team.gpg
+curl -1sLf https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-erlang/gpg.E495BB49CC4BBE5B.key | sudo gpg --dearmor | sudo tee /usr/share/keyrings/io.cloudsmith.rabbitmq.E495BB49CC4BBE5B.gpg
+curl -1sLf https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/gpg.9F4587F226208342.key | sudo gpg --dearmor | sudo tee /usr/share/keyrings/io.cloudsmith.rabbitmq.9F4587F226208342.gpg
+tee /etc/apt/sources.list.d/rabbitmq_rabbitmq-server.list <<EOT
 ## Installs the latest Erlang 22.x release.
 ## Change component to "erlang-21.x" to install the latest 21.x version.
 ## "bionic" as distribution name should work for any later Ubuntu or Debian release.
 ## See the release to distribution mapping table in RabbitMQ doc guides to learn more.
-deb [trusted=yes] https://dl.bintray.com/rabbitmq-erlang/debian ${distro} erlang
-deb [trusted=yes] https://dl.bintray.com/rabbitmq/debian ${distro} main
+## deb [trusted=yes] https://dl.bintray.com/rabbitmq-erlang/debian ${distro} erlang
+## deb [trusted=yes] https://dl.bintray.com/rabbitmq/debian ${distro} main
+deb [signed-by=/usr/share/keyrings/io.cloudsmith.rabbitmq.E495BB49CC4BBE5B.gpg] https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-erlang/deb/ubuntu bionic main
+deb-src [signed-by=/usr/share/keyrings/io.cloudsmith.rabbitmq.E495BB49CC4BBE5B.gpg] https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-erlang/deb/ubuntu bionic main
+deb [signed-by=/usr/share/keyrings/io.cloudsmith.rabbitmq.9F4587F226208342.gpg] https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/ubuntu bionic main
+deb-src [signed-by=/usr/share/keyrings/io.cloudsmith.rabbitmq.9F4587F226208342.gpg] https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/ubuntu bionic main
+deb [signed-by=/usr/share/keyrings/rabbitmq_rabbitmq-server-archive-keyring.gpg] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu focal main
+deb-src [signed-by=/usr/share/keyrings/rabbitmq_rabbitmq-server-archive-keyring.gpg] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu focal main
 EOT
 
 update_apt_pkg
