@@ -232,9 +232,9 @@ do
   esac
 done
 
-opencti_ver="4.2.1"
+opencti_ver="5.3.7"
 opencti_dir="/opt/opencti"
-opencti_worker_count=2
+opencti_worker_count=4
 
 # ###########
 # Main script
@@ -541,8 +541,8 @@ echo "Changing owner of ${opencti_dir} to:" $(whoami)":"$(id -gn)
 chown -R $(whoami):$(id -gn) "${opencti_dir}"
 
 echo "OpenCTI: Installing Python dependencies"
-${run_python} -m pip -q install -r "${opencti_dir}/connectors/export-file-stix/src/requirements.txt"
-${run_python} -m pip -q install -r "${opencti_dir}/connectors/import-file-stix/src/requirements.txt"
+${run_python} -m pip -q install -r "${opencti_dir}/connectors/internal-export-file/export-file-stix/src/requirements.txt"
+${run_python} -m pip -q install -r "${opencti_dir}/connectors/internal-import-file/import-file-stix/src/requirements.txt"
 ${run_python} -m pip -q install -r "${opencti_dir}/src/python/requirements.txt"
 ${run_python} -m pip -q install -r "${opencti_dir}/worker/requirements.txt"
 ${run_python} -m pip install requests==2.25.0
