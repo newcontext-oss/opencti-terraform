@@ -203,10 +203,10 @@ else
 fi
 
 # TypeDB
-typedb_bin_version="2.11.0"
-typedb_console_version="2.11.0"
-typedb_core_all_version="2.11.0"
-typedb_core_server_version="2.11.0"
+typedb_bin_version="2.11.1"
+typedb_console_version="2.11.1"
+typedb_core_all_version="2.11.1"
+typedb_core_server_version="2.11.1"
 
 # Minio
 minio_dir="/opt/minio/data"
