@@ -215,7 +215,7 @@ minio_dir="/opt/minio/data"
 redis_ver="7.0.2"
 
 # RabbitMQ
-rabbitmq_ver="3.8.34-1"
+rabbitmq_ver="3.10.5-1"
 rabbitmq_release_url="https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc"
 
 # OpenCTI
