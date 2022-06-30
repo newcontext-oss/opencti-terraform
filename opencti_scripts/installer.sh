@@ -457,7 +457,7 @@ Type=notify
 ExecStart=/usr/local/bin/redis-server /etc/redis/redis.conf
 ExecStop=/usr/local/bin/redis-cli -p 6379 shutdown
 ExecReload=/bin/kill -USR2 \$MAINPID
-TimeoutStartSec=10
+TimeoutStartSec=30
 TimeoutStopSec=10
 Restart=on-failure
 [Install]
