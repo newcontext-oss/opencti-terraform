@@ -201,6 +201,14 @@ do
     fi
 
     sbasename=$(basename "$i")
+    scriptname="$sbasename"
+
+    # Some of the services use the service name as the main Python script name, while
+    # others have started using "main.py". This check attempts to discover which the
+    # service in question is using, and adapts to it, falling back on the old behavior
+    if [[ -f "${opencti_connector_dir}/$i/src/main.py" ]]; then
+        scriptname="main"
+    fi
 
     if [[ ! -f "/etc/systemd/system/opencti-connector-$sbasename.service" ]]
     then
@@ -216,7 +224,7 @@ RestartSec=20
 TimeoutStartSec=600
 Type=simple
 WorkingDirectory=${opencti_connector_dir}/$i/src
-ExecStart=/usr/bin/python${python_ver} "${opencti_connector_dir}/$i/src/$sbasename.py"
+ExecStart=/usr/bin/python${python_ver} "${opencti_connector_dir}/$i/src/$scriptname.py"
 ExecReload=/bin/kill -s HUP \$MAINPID
 ExecStop=/bin/kill -s TERM \$MAINPID
 PrivateTmp=true
