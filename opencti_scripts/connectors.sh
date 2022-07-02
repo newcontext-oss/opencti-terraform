@@ -208,7 +208,12 @@ do
 [Unit]
 Description=OpenCTI Connector - $i
 After=network.target
+StartLimitBurst=30
+StartLimitInterval=0
+
 [Service]
+RestartSec=20
+TimeoutStartSec=600
 Type=simple
 WorkingDirectory=${opencti_connector_dir}/$i/src
 ExecStart=/usr/bin/python${python_ver} "${opencti_connector_dir}/$i/src/$sbasename.py"

@@ -588,7 +588,12 @@ cat > /etc/systemd/system/opencti-worker@.service <<- EOT
 [Unit]
 Description=OpenCTI Worker daemon %i
 After=network.target opencti-server.service
+StartLimitBurst=30
+StartLimitInterval=0
+
 [Service]
+RestartSec=20
+TimeoutStartSec=600
 Type=simple
 WorkingDirectory=${opencti_dir}/worker/
 ExecStart=/usr/bin/${run_python} "${opencti_dir}/worker/worker.py"
