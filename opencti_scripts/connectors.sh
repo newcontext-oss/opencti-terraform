@@ -158,7 +158,7 @@ CONNECTORS['external-import/malpedia']=0
 CONNECTORS['external-import/misp']=1
 CONNECTORS['external-import/mitre']=1
 CONNECTORS['external-import/opencti']=1
-CONNECTORS['external-import/valhalla']=0
+CONNECTORS['external-import/valhalla']=1
 CONNECTORS['internal-enrichment/virustotal']=1
 
 echo "The following connectors will be installed:"
