@@ -237,7 +237,7 @@ do
   esac
 done
 
-opencti_ver="5.3.7"
+opencti_ver="5.3.10"
 opencti_dir="/opt/opencti"
 opencti_worker_count=4
 
