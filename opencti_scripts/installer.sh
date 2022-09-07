@@ -208,7 +208,7 @@ else
 fi
 
 # TypeDB
-typedb_bin_version="2.11.1"
+typedb_bin_version="2.9.0"
 typedb_console_version="2.11.1"
 typedb_core_all_version="2.11.1"
 typedb_core_server_version="2.11.1"
@@ -319,6 +319,8 @@ update_apt_pkg
 # check_apt_pkg 'grakn-bin' "=${grakn_bin_version}"
 # check_apt_pkg 'grakn-core-server' "=${grakn_core_server_version}"
 # check_apt_pkg 'grakn-console' "=${grakn_console_version}"
+check_apt_pkg 'typedb-bin' "=${typedb_bin_version}"
+check_apt_pkg 'typedb-server' "=${typedb_core_all_version}"
 check_apt_pkg 'typedb-all' "=${typedb_core_all_version}"
 
 ### Create systemd unit file for TypeDB
