@@ -368,7 +368,8 @@ enable_service 'elasticsearch'
 
 ## Minio
 log_section_heading "Minio"
-wget --quiet -O minio https://dl.min.io/server/minio/release/linux-amd64/minio
+my_minio_arch=`uname -m | sed s/aarch64/arm64/g | sed s/x86_64/amd64/g`
+wget --quiet -O minio https://dl.min.io/server/minio/release/linux-${my_minio_arch}/minio
 chmod +x minio
 mv minio "/usr/local/bin/"
 if [[ ! -d "${minio_dir}" ]]
