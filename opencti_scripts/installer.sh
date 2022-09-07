@@ -198,6 +198,11 @@ then
   # Using bionic since focal not avaialble yet for RabbitMQ
   distro="bionic"
   run_python="python3"
+elif [[ ${ubuntu_version} == 22 ]]
+then
+  # Using bionic since focal not avaialble yet for RabbitMQ
+  distro="bionic"
+  run_python="python3"
 else
   quit_on_error echo "You are using an unsupported version of Ubuntu. Exiting."
 fi

@@ -123,6 +123,10 @@ elif [[ ${ubuntu_version} == 20 ]]
 then
   # Using bionic since focal not avaialble yet for RabbitMQ
   python_ver="3"
+elif [[ ${ubuntu_version} == 22 ]]
+then
+  # Using bionic since focal not avaialble yet for RabbitMQ
+  python_ver="3"
 else
   quit_on_error echo "You are using an unsupported version of Ubuntu. Exiting."
 fi
