@@ -358,9 +358,12 @@ cat <<EOT > /etc/logrotate.d/elasticsearch
 }
 EOT
 wget -qO - 'https://artifacts.elastic.co/GPG-KEY-elasticsearch' | apt-key add -
-add-apt-repository "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
+add-apt-repository "deb https://artifacts.elastic.co/packages/8.x/apt stable main"
 update_apt_pkg
 check_apt_pkg 'elasticsearch'
+sed -i 's|xpack.security.enabled: true|xpack.security.enabled: false|' /etc/elasticsearch/elasticsearch.yml
+sed -i 's|xpack.security.enrollment.enabled: true|xpack.security.enrollment.enabled: false|' /etc/elasticsearch/elasticsearch.yml
+sed -i 's|^  enabled: true|  enabled: false|' /etc/elasticsearch/elasticsearch.yml
 enable_service 'elasticsearch'
 
 ## Minio
