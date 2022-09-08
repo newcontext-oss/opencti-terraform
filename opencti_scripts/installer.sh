@@ -213,9 +213,6 @@ typedb_console_version="2.11.1"
 typedb_core_all_version="2.11.1"
 typedb_core_server_version="2.11.1"
 
-# Minio
-minio_dir="/opt/minio/data"
-
 # Redis
 redis_ver="7.0.2"
 
@@ -267,7 +264,6 @@ disable_service 'opencti-server'
 disable_service 'elasticsearch'
 disable_service 'redis-server'
 disable_service 'rabbitmq-server'
-disable_service 'minio'
 disable_service 'typedb'
 
 # The VMs we're running are not that big and we're going to quickly fill the system log with our work (and especially the connectors). This will max out the logs at 100M.
@@ -365,45 +361,6 @@ sed -i 's|xpack.security.enabled: true|xpack.security.enabled: false|' /etc/elas
 sed -i 's|xpack.security.enrollment.enabled: true|xpack.security.enrollment.enabled: false|' /etc/elasticsearch/elasticsearch.yml
 sed -i 's|^  enabled: true|  enabled: false|' /etc/elasticsearch/elasticsearch.yml
 enable_service 'elasticsearch'
-
-## Minio
-log_section_heading "Minio"
-my_minio_arch=`uname -m | sed s/aarch64/arm64/g | sed s/x86_64/amd64/g`
-wget --quiet -O minio https://dl.min.io/server/minio/release/linux-${my_minio_arch}/minio
-chmod +x minio
-mv minio "/usr/local/bin/"
-if [[ ! -d "${minio_dir}" ]]
-then
-  mkdir -p "${minio_dir}"
-fi
-
-### From: https://github.com/minio/minio-service/blob/master/linux-systemd/minio.service
-if [[ ! -f "/etc/default/minio" ]]
-then
-  # .minio.access_key
-  RMINIOAK="$(openssl rand -hex 12)"
-  # .minio.secret_key
-  RMINIOSK="$(openssl rand -base64 25 | tr -d '/')"
-  cat > /etc/default/minio <<- EOT
-# Volume to be used for MinIO server.
-MINIO_VOLUMES="/opt/minio/data/"
-# Use if you want to run MinIO on a custom port.
-# MINIO_OPTS="--address :9199"
-# Access Key of the server.
-MINIO_ACCESS_KEY=${RMINIOAK}
-# Secret key of the server.
-MINIO_SECRET_KEY=${RMINIOSK}
-EOT
-else
-  RMINIOAK="$(grep -o 'MINIO_ACCESS_KEY=.*' /etc/default/minio | cut -f2- -d=)"
-  RMINIOSK="$(grep -o 'MINIO_SECRET_KEY=.*' /etc/default/minio | cut -f2- -d=)"
-fi
-
-curl "https://raw.githubusercontent.com/minio/minio-service/master/linux-systemd/minio.service" -o "/etc/systemd/system/minio.service"
-sed -i'' -e 's/User=minio-user/User=root/g' "/etc/systemd/system/minio.service"
-sed -i'' -e 's/Group=minio-user/Group=root/g' "/etc/systemd/system/minio.service"
-systemctl daemon-reload
-enable_service 'minio'
 
 ## Redis
 log_section_heading "Redis"
@@ -536,7 +493,6 @@ echo -e "${RMQ_user_list}"
 log_section_heading "Checking service statuses"
 check_service 'elasticsearch'
 check_service 'typedb'
-check_service 'minio'
 check_service 'rabbitmq-server'
 check_service 'redis-server'
 
@@ -567,7 +523,7 @@ RADMINTOKEN="$(uuidgen -r | tr -d '\n' | tr '[:upper:]' '[:lower:]')"
 
 echo "OpenCTI: Copy proper configs"
 # Take default configuration and fill in our values.
-cat ${opencti_dir}/config/default.json | jq ".app.admin.email=\"${opencti_email}\" | .app.admin.password=\"${RADMINPASS}\" | .app.admin.token=\"${RADMINTOKEN}\" | .minio.access_key=\"${RMINIOAK}\" | .minio.secret_key=\"${RMINIOSK}\" | .rabbitmq.username=\"${RRMQUNAME}\" | .rabbitmq.password=\"${RRMQPASS}\"" > ${opencti_dir}/config/production.json
+cat ${opencti_dir}/config/default.json | jq ".app.admin.email=\"${opencti_email}\" | .app.admin.password=\"${RADMINPASS}\" | .app.admin.token=\"${RADMINTOKEN}\" | .minio.bucket_name=\"${storage_bucket}\" | .minio.endpoint=\"s3.amazonaws.com\" | .minio.port=443 | .minio.use_ssl=true | .minio.access_key=\"\" | .minio.secret_key=\"\" | .minio.use_aws_role=true | .rabbitmq.username=\"${RRMQUNAME}\" | .rabbitmq.password=\"${RRMQPASS}\"" > ${opencti_dir}/config/production.json
 
 echo "OpenCTI: Create unit file"
 cat > /etc/systemd/system/opencti-server.service <<- EOT
