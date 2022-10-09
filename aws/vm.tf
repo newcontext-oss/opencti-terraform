@@ -7,6 +7,9 @@ resource "aws_instance" "opencti_instance" {
   iam_instance_profile        = aws_iam_instance_profile.opencti_profile.name
   root_block_device {
     volume_size = var.root_volume_size
+    volume_type = "gp3"
+    iops = 3000
+    throughput = 125
   }
   subnet_id = var.subnet_id
 
