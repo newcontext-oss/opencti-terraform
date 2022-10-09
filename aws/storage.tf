@@ -1,12 +1,18 @@
 # S3 bucket to store install and connectors scripts.
 resource "aws_s3_bucket" "opencti_bucket" {
   bucket = var.storage_bucket
-  acl    = "private"
+}
 
-  # Turn on bucket versioning. We'll be storing the Terraform state in S3 and versioning will help protect against human error.
-  versioning {
-    enabled = true
-  }
+resource "aws_s3_bucket_versioning" "opencti_bucket_versioning" {
+    bucket = aws_s3_bucket.opencti_bucket.id
+    versioning_configuration {
+        status = "Enabled"
+    }
+}
+
+resource "aws_s3_bucket_acl" "opencti_bucket_acl" {
+    bucket = aws_s3_bucket.opencti_bucket.id
+    acl = "private"
 }
 
 # S3 IAM (I don't think any of these permissions are being used)
@@ -34,14 +40,14 @@ resource "aws_iam_role_policy_attachment" "opencti_s3_attach" {
 }
 
 # OpenCTI installer script
-resource "aws_s3_bucket_object" "opencti-install-script" {
+resource "aws_s3_object" "opencti-install-script" {
   bucket = aws_s3_bucket.opencti_bucket.id
   key    = "opencti-installer.sh"
   source = "../opencti_scripts/installer.sh"
 }
 
 # OpenCTI connectors script
-resource "aws_s3_bucket_object" "opencti-connectors-script" {
+resource "aws_s3_object" "opencti-connectors-script" {
   bucket = aws_s3_bucket.opencti_bucket.id
   key    = "opencti-connectors.sh"
   source = "../opencti_scripts/connectors.sh"
