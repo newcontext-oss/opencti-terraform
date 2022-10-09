@@ -214,7 +214,7 @@ typedb_core_all_version="2.11.1"
 typedb_core_server_version="2.11.1"
 
 # Redis
-redis_ver="7.0.2"
+redis_ver="7.0.5"
 
 # RabbitMQ
 rabbitmq_ver="3.10.5-1"
@@ -234,7 +234,7 @@ do
   esac
 done
 
-opencti_ver="5.3.16"
+opencti_ver="5.3.17"
 opencti_dir="/opt/opencti"
 opencti_worker_count=4
 
