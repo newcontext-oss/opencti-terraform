@@ -126,7 +126,7 @@ function check_apt_pkg {
 }
 
 # Function: check_service
-# Checks if a service is active or nah. Matches Grakn service output.
+# Checks if a service is active or nah. Matches TypeDB service output.
 # Parameters:
 # - $1: service to check
 function check_service {
@@ -198,24 +198,26 @@ then
   # Using bionic since focal not avaialble yet for RabbitMQ
   distro="bionic"
   run_python="python3"
+elif [[ ${ubuntu_version} == 22 ]]
+then
+  # Using bionic since focal not avaialble yet for RabbitMQ
+  distro="bionic"
+  run_python="python3"
 else
   quit_on_error echo "You are using an unsupported version of Ubuntu. Exiting."
 fi
 
-# Grakn
-grakn_bin_version="2.0.0-alpha-6"
-grakn_console_version="2.0.0-alpha-4"
-grakn_core_all_version="2.0.0-alpha-4"
-grakn_core_server_version="2.0.0-alpha-4"
-
-# Minio
-minio_dir="/opt/minio/data"
+# TypeDB
+typedb_bin_version="2.9.0"
+typedb_console_version="2.11.1"
+typedb_core_all_version="2.11.1"
+typedb_core_server_version="2.11.1"
 
 # Redis
-redis_ver="6.0.5"
+redis_ver="7.0.5"
 
 # RabbitMQ
-rabbitmq_ver="3.8.5-1"
+rabbitmq_ver="3.10.5-1"
 rabbitmq_release_url="https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc"
 
 # OpenCTI
@@ -232,9 +234,9 @@ do
   esac
 done
 
-opencti_ver="4.2.1"
+opencti_ver="5.3.17"
 opencti_dir="/opt/opencti"
-opencti_worker_count=2
+opencti_worker_count=4
 
 # ###########
 # Main script
@@ -262,8 +264,7 @@ disable_service 'opencti-server'
 disable_service 'elasticsearch'
 disable_service 'redis-server'
 disable_service 'rabbitmq-server'
-disable_service 'minio'
-disable_service 'grakn'
+disable_service 'typedb'
 
 # The VMs we're running are not that big and we're going to quickly fill the system log with our work (and especially the connectors). This will max out the logs at 100M.
 echo "SystemMaxUse=100M" >> /etc/systemd/journald.conf
@@ -304,34 +305,36 @@ check_apt_pkg "python3-pip"
 ${run_python} -m pip install --upgrade pip
 ${run_python} -m pip -q install --ignore-installed PyYAML
 
-## Grakn
-log_section_heading "Grakn"
+## TypeDB
+log_section_heading "TypeDB"
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 8F3DA4B5E9AEF44C
-sudo add-apt-repository 'deb [ arch=all ] https://repo.grakn.ai/repository/apt/ trusty main'
+sudo add-apt-repository 'deb [ arch=all ] https://repo.vaticle.com/repository/apt/ trusty main'
 update_apt_pkg
 # apt-get install -y grakn-console=2.0.0-alpha-3 # Required dependency
 # apt-get install -y grakn-core-all
-check_apt_pkg 'grakn-bin' "=${grakn_bin_version}"
-check_apt_pkg 'grakn-core-server' "=${grakn_core_server_version}"
-check_apt_pkg 'grakn-console' "=${grakn_console_version}"
-check_apt_pkg 'grakn-core-all' "=${grakn_core_all_version}"
+# check_apt_pkg 'grakn-bin' "=${grakn_bin_version}"
+# check_apt_pkg 'grakn-core-server' "=${grakn_core_server_version}"
+# check_apt_pkg 'grakn-console' "=${grakn_console_version}"
+check_apt_pkg 'typedb-bin' "=${typedb_bin_version}"
+check_apt_pkg 'typedb-server' "=${typedb_core_all_version}"
+check_apt_pkg 'typedb-all' "=${typedb_core_all_version}"
 
-### Create systemd unit file for Grakn
-cat <<EOT > /etc/systemd/system/grakn.service
+### Create systemd unit file for TypeDB
+cat <<EOT > /etc/systemd/system/typedb.service
 [Unit]
-Description=Grakn.AI Server daemon
+Description=TypeDB Server daemon
 After=network.target
 [Service]
-Type=forking
-ExecStart=/usr/local/bin/grakn server start
-ExecStop=/usr/local/bin/grakn server stop
-ExecReload=/usr/local/bin/grakn server stop && /usr/local/bin/grakn server start
-RemainAfterExit=yes
+Type=simple
+ExecStart=/usr/local/bin/typedb server
+#ExecStop=/usr/local/bin/typedb server stop
+#ExecReload=/usr/local/bin/typedb server stop && /usr/local/bin/typedb server start
+#RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
 EOT
 systemctl daemon-reload
-enable_service 'grakn'
+enable_service 'typedb'
 
 ## Elasticsearch
 log_section_heading "Elasticsearch"
@@ -351,48 +354,13 @@ cat <<EOT > /etc/logrotate.d/elasticsearch
 }
 EOT
 wget -qO - 'https://artifacts.elastic.co/GPG-KEY-elasticsearch' | apt-key add -
-add-apt-repository "deb https://artifacts.elastic.co/packages/7.x/apt stable main"
+add-apt-repository "deb https://artifacts.elastic.co/packages/8.x/apt stable main"
 update_apt_pkg
 check_apt_pkg 'elasticsearch'
+sed -i 's|xpack.security.enabled: true|xpack.security.enabled: false|' /etc/elasticsearch/elasticsearch.yml
+sed -i 's|xpack.security.enrollment.enabled: true|xpack.security.enrollment.enabled: false|' /etc/elasticsearch/elasticsearch.yml
+sed -i 's|^  enabled: true|  enabled: false|' /etc/elasticsearch/elasticsearch.yml
 enable_service 'elasticsearch'
-
-## Minio
-log_section_heading "Minio"
-wget --quiet -O minio https://dl.min.io/server/minio/release/linux-amd64/minio
-chmod +x minio
-mv minio "/usr/local/bin/"
-if [[ ! -d "${minio_dir}" ]]
-then
-  mkdir -p "${minio_dir}"
-fi
-
-### From: https://github.com/minio/minio-service/blob/master/linux-systemd/minio.service
-if [[ ! -f "/etc/default/minio" ]]
-then
-  # .minio.access_key
-  RMINIOAK="$(openssl rand -hex 12)"
-  # .minio.secret_key
-  RMINIOSK="$(openssl rand -base64 25 | tr -d '/')"
-  cat > /etc/default/minio <<- EOT
-# Volume to be used for MinIO server.
-MINIO_VOLUMES="/opt/minio/data/"
-# Use if you want to run MinIO on a custom port.
-# MINIO_OPTS="--address :9199"
-# Access Key of the server.
-MINIO_ACCESS_KEY=${RMINIOAK}
-# Secret key of the server.
-MINIO_SECRET_KEY=${RMINIOSK}
-EOT
-else
-  RMINIOAK="$(grep -o 'MINIO_ACCESS_KEY=.*' /etc/default/minio | cut -f2- -d=)"
-  RMINIOSK="$(grep -o 'MINIO_SECRET_KEY=.*' /etc/default/minio | cut -f2- -d=)"
-fi
-
-curl "https://raw.githubusercontent.com/minio/minio-service/master/linux-systemd/minio.service" -o "/etc/systemd/system/minio.service"
-sed -i'' -e 's/User=minio-user/User=root/g' "/etc/systemd/system/minio.service"
-sed -i'' -e 's/Group=minio-user/Group=root/g' "/etc/systemd/system/minio.service"
-systemctl daemon-reload
-enable_service 'minio'
 
 ## Redis
 log_section_heading "Redis"
@@ -436,7 +404,7 @@ fi
 if [[ ! -f "/etc/redis/redis.conf" ]]
 then
   cp "redis-${redis_ver}/redis.conf" "/etc/redis/redis.conf"
-  sed -i 's/^supervised no/supervised systemd/' "/etc/redis/redis.conf"
+  sed -i 's/^\#\ supervised\ .*$/supervised auto/' "/etc/redis/redis.conf"
   chown redis:redis "/etc/redis/redis.conf"
 fi
 
@@ -457,7 +425,7 @@ Type=notify
 ExecStart=/usr/local/bin/redis-server /etc/redis/redis.conf
 ExecStop=/usr/local/bin/redis-cli -p 6379 shutdown
 ExecReload=/bin/kill -USR2 \$MAINPID
-TimeoutStartSec=10
+TimeoutStartSec=900
 TimeoutStopSec=10
 Restart=on-failure
 [Install]
@@ -471,13 +439,23 @@ enable_service 'redis-server'
 ## RabbitMQ
 log_section_heading "RabbitMQ"
 curl -fsSL "${rabbitmq_release_url}" | apt-key add -
-tee /etc/apt/sources.list.d/bintray.rabbitmq.list <<EOT
+curl -fsSL https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey | sudo gpg --dearmor | sudo tee /usr/share/keyrings/rabbitmq_rabbitmq-server-archive-keyring.gpg
+curl -1sLf "https://keys.openpgp.org/vks/v1/by-fingerprint/0A9AF2115F4687BD29803A206B73A36E6026DFCA" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/com.rabbitmq.team.gpg
+curl -1sLf https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-erlang/gpg.E495BB49CC4BBE5B.key | sudo gpg --dearmor | sudo tee /usr/share/keyrings/io.cloudsmith.rabbitmq.E495BB49CC4BBE5B.gpg
+curl -1sLf https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/gpg.9F4587F226208342.key | sudo gpg --dearmor | sudo tee /usr/share/keyrings/io.cloudsmith.rabbitmq.9F4587F226208342.gpg
+tee /etc/apt/sources.list.d/rabbitmq_rabbitmq-server.list <<EOT
 ## Installs the latest Erlang 22.x release.
 ## Change component to "erlang-21.x" to install the latest 21.x version.
 ## "bionic" as distribution name should work for any later Ubuntu or Debian release.
 ## See the release to distribution mapping table in RabbitMQ doc guides to learn more.
-deb [trusted=yes] https://dl.bintray.com/rabbitmq-erlang/debian ${distro} erlang
-deb [trusted=yes] https://dl.bintray.com/rabbitmq/debian ${distro} main
+## deb [trusted=yes] https://dl.bintray.com/rabbitmq-erlang/debian ${distro} erlang
+## deb [trusted=yes] https://dl.bintray.com/rabbitmq/debian ${distro} main
+deb [signed-by=/usr/share/keyrings/io.cloudsmith.rabbitmq.E495BB49CC4BBE5B.gpg] https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-erlang/deb/ubuntu bionic main
+deb-src [signed-by=/usr/share/keyrings/io.cloudsmith.rabbitmq.E495BB49CC4BBE5B.gpg] https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-erlang/deb/ubuntu bionic main
+deb [signed-by=/usr/share/keyrings/io.cloudsmith.rabbitmq.9F4587F226208342.gpg] https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/ubuntu bionic main
+deb-src [signed-by=/usr/share/keyrings/io.cloudsmith.rabbitmq.9F4587F226208342.gpg] https://dl.cloudsmith.io/public/rabbitmq/rabbitmq-server/deb/ubuntu bionic main
+deb [signed-by=/usr/share/keyrings/rabbitmq_rabbitmq-server-archive-keyring.gpg] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu focal main
+deb-src [signed-by=/usr/share/keyrings/rabbitmq_rabbitmq-server-archive-keyring.gpg] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu focal main
 EOT
 
 update_apt_pkg
@@ -514,8 +492,7 @@ echo -e "${RMQ_user_list}"
 # Check status of services
 log_section_heading "Checking service statuses"
 check_service 'elasticsearch'
-check_service 'grakn'
-check_service 'minio'
+check_service 'typedb'
 check_service 'rabbitmq-server'
 check_service 'redis-server'
 
@@ -531,8 +508,8 @@ echo "Changing owner of ${opencti_dir} to:" $(whoami)":"$(id -gn)
 chown -R $(whoami):$(id -gn) "${opencti_dir}"
 
 echo "OpenCTI: Installing Python dependencies"
-${run_python} -m pip -q install -r "${opencti_dir}/connectors/export-file-stix/src/requirements.txt"
-${run_python} -m pip -q install -r "${opencti_dir}/connectors/import-file-stix/src/requirements.txt"
+${run_python} -m pip -q install -r "${opencti_dir}/connectors/internal-export-file/export-file-stix/src/requirements.txt"
+${run_python} -m pip -q install -r "${opencti_dir}/connectors/internal-import-file/import-file-stix/src/requirements.txt"
 ${run_python} -m pip -q install -r "${opencti_dir}/src/python/requirements.txt"
 ${run_python} -m pip -q install -r "${opencti_dir}/worker/requirements.txt"
 ${run_python} -m pip install requests==2.25.0
@@ -546,7 +523,7 @@ RADMINTOKEN="$(uuidgen -r | tr -d '\n' | tr '[:upper:]' '[:lower:]')"
 
 echo "OpenCTI: Copy proper configs"
 # Take default configuration and fill in our values.
-cat ${opencti_dir}/config/default.json | jq ".app.admin.email=\"${opencti_email}\" | .app.admin.password=\"${RADMINPASS}\" | .app.admin.token=\"${RADMINTOKEN}\" | .minio.access_key=\"${RMINIOAK}\" | .minio.secret_key=\"${RMINIOSK}\" | .rabbitmq.username=\"${RRMQUNAME}\" | .rabbitmq.password=\"${RRMQPASS}\"" > ${opencti_dir}/config/production.json
+cat ${opencti_dir}/config/default.json | jq ".app.admin.email=\"${opencti_email}\" | .app.admin.password=\"${RADMINPASS}\" | .app.admin.token=\"${RADMINTOKEN}\" | .minio.bucket_name=\"${storage_bucket}\" | .minio.endpoint=\"s3.amazonaws.com\" | .minio.port=443 | .minio.use_ssl=true | .minio.access_key=\"\" | .minio.secret_key=\"\" | .minio.use_aws_role=true | .rabbitmq.username=\"${RRMQUNAME}\" | .rabbitmq.password=\"${RRMQPASS}\"" > ${opencti_dir}/config/production.json
 
 echo "OpenCTI: Create unit file"
 cat > /etc/systemd/system/opencti-server.service <<- EOT
@@ -578,7 +555,12 @@ cat > /etc/systemd/system/opencti-worker@.service <<- EOT
 [Unit]
 Description=OpenCTI Worker daemon %i
 After=network.target opencti-server.service
+StartLimitBurst=30
+StartLimitInterval=0
+
 [Service]
+RestartSec=20
+TimeoutStartSec=600
 Type=simple
 WorkingDirectory=${opencti_dir}/worker/
 ExecStart=/usr/bin/${run_python} "${opencti_dir}/worker/worker.py"

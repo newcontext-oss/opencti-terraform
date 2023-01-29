@@ -123,6 +123,10 @@ elif [[ ${ubuntu_version} == 20 ]]
 then
   # Using bionic since focal not avaialble yet for RabbitMQ
   python_ver="3"
+elif [[ ${ubuntu_version} == 22 ]]
+then
+  # Using bionic since focal not avaialble yet for RabbitMQ
+  python_ver="3"
 else
   quit_on_error echo "You are using an unsupported version of Ubuntu. Exiting."
 fi
@@ -140,26 +144,26 @@ warn_user
 # This will only set up your instance for the connectors enabled. You must supply an API token (e.g., alienvault token) and enable the service.
 # It should be safe to run this after changing configs or enabling services.
 declare -A CONNECTORS;
-CONNECTORS['alienvault']=0
-CONNECTORS['amitt']=0
-CONNECTORS['crowdstrike']=0
-CONNECTORS['cryptolaemus']=0
-CONNECTORS['cve']=1
-CONNECTORS['cyber-threat-coalition']=0
-CONNECTORS['cybercrime-tracker']=0
-CONNECTORS['export-file-csv']=1
-CONNECTORS['export-file-stix']=1
-CONNECTORS['hygiene']=0
-CONNECTORS['import-file-pdf-observables']=1
-CONNECTORS['import-file-stix']=1
-CONNECTORS['ipinfo']=0
-CONNECTORS['lastinfosec']=0
-CONNECTORS['malpedia']=0
-CONNECTORS['misp']=1
-CONNECTORS['mitre']=1
-CONNECTORS['opencti']=1
-CONNECTORS['valhalla']=0
-CONNECTORS['virustotal']=1
+CONNECTORS['external-import/alienvault']=0
+CONNECTORS['external-import/amitt']=0
+CONNECTORS['external-import/crowdstrike']=0
+CONNECTORS['external-import/cryptolaemus']=0
+CONNECTORS['external-import/cve']=1
+CONNECTORS['external-import/cyber-threat-coalition']=0
+CONNECTORS['external-import/cybercrime-tracker']=0
+CONNECTORS['internal-export-file/export-file-csv']=1
+CONNECTORS['internal-export-file/export-file-stix']=1
+CONNECTORS['internal-enrichment/hygiene']=0
+CONNECTORS['internal-import-file/import-document']=1
+CONNECTORS['internal-import-file/import-file-stix']=1
+CONNECTORS['internal-enrichment/ipinfo']=0
+CONNECTORS['external-import/lastinfosec']=0
+CONNECTORS['external-import/malpedia']=0
+CONNECTORS['external-import/misp']=1
+CONNECTORS['external-import/mitre']=1
+CONNECTORS['external-import/opencti']=1
+CONNECTORS['external-import/valhalla']=1
+CONNECTORS['internal-enrichment/virustotal']=1
 
 echo "The following connectors will be installed:"
 for i in "${!CONNECTORS[@]}"
@@ -200,16 +204,31 @@ do
       sed -i"" -e "s/id: 'ChangeMe'/id: '$(uuidgen -r | tr -d '\n' | tr '[:upper:]' '[:lower:]')'/g" "${opencti_connector_dir}/$i/src/config.yml"
     fi
 
-    if [[ ! -f "/etc/systemd/system/opencti-connector-$i.service" ]]
+    sbasename=$(basename "$i")
+    scriptname="$sbasename"
+
+    # Some of the services use the service name as the main Python script name, while
+    # others have started using "main.py". This check attempts to discover which the
+    # service in question is using, and adapts to it, falling back on the old behavior
+    if [[ -f "${opencti_connector_dir}/$i/src/main.py" ]]; then
+        scriptname="main"
+    fi
+
+    if [[ ! -f "/etc/systemd/system/opencti-connector-$sbasename.service" ]]
     then
-      cat > /etc/systemd/system/opencti-connector-$i.service <<- EOT
+      cat > /etc/systemd/system/opencti-connector-$sbasename.service <<- EOT
 [Unit]
 Description=OpenCTI Connector - $i
 After=network.target
+StartLimitBurst=30
+StartLimitInterval=0
+
 [Service]
+RestartSec=20
+TimeoutStartSec=600
 Type=simple
 WorkingDirectory=${opencti_connector_dir}/$i/src
-ExecStart=/usr/bin/python${python_ver} "${opencti_connector_dir}/$i/src/$i.py"
+ExecStart=/usr/bin/python${python_ver} "${opencti_connector_dir}/$i/src/$scriptname.py"
 ExecReload=/bin/kill -s HUP \$MAINPID
 ExecStop=/bin/kill -s TERM \$MAINPID
 PrivateTmp=true
@@ -219,16 +238,16 @@ WantedBy=multi-user.target
 EOT
 
       systemctl daemon-reload
-      systemctl start opencti-connector-$i.service
+      systemctl start opencti-connector-$sbasename.service
     fi
 
-    if [[ $(systemctl status --no-pager opencti-connector-$i.service | grep 'Active: active') ]]
+    if [[ $(systemctl status --no-pager opencti-connector-$sbasename.service | grep 'Active: active') ]]
     then
-      echo "opencti-connector-$i.service is already running, restarting due to config changes"
-      systemctl restart opencti-connector-$i.service
+      echo "opencti-connector-$sbasename.service is already running, restarting due to config changes"
+      systemctl restart opencti-connector-$sbasename.service
     fi
 
-    quit_on_error "Installing service for connector: $i"
+    quit_on_error "Installing service for connector: $sbasename"
   fi
 done
 

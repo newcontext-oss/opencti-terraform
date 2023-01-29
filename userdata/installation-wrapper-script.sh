@@ -41,10 +41,10 @@ chmod +x /opt/${connectors_script_name}
 echo "Starting OpenCTI installation script"
 # Run the install script with the provided e-mail address.
 # AWS automatically runs the script as root, Azure doesn't.
-sudo /opt/${install_script_name} -e "${login_email}"
+sudo /usr/bin/env storage_bucket="${storage_bucket}" /opt/${install_script_name} -e "${login_email}"
 echo "OpenCTI installation script complete."
 
 echo "Starting OpenCTI connectors script."
 # Run the script without prompting the user (the default, `-p 0`, will prompt if the user wants to apply; this is less than ideal for an automated script).
-sudo /opt/${connectors_script_name} -p 1
+sudo /usr/bin/env storage_bucket="${storage_bucket}" /opt/${connectors_script_name} -p 1
 echo "OpenCTI wrapper script complete."
