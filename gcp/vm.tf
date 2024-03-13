@@ -1,16 +1,14 @@
 # Startup script template
-data "template_file" "startup_script" {
-  template = file("../userdata/installation-wrapper-script.sh")
-  # The wrapper script is used by each of the providers and each variable has to be filled out in order to run. Unfortunately, this means that if you change something in one provider, you have to change it in each of the others. It's not ideal, but FYI.
-  vars = {
-    "account_name"           = "only for azure"
-    "cloud"                  = "gcp"
-    "connection_string"      = "only for azure"
-    "connectors_script_name" = "opencti-connectors.sh"
-    "install_script_name"    = "opencti-installer.sh"
-    "login_email"            = var.login_email
-    "storage_bucket"         = var.storage_bucket
-  }
+locals {
+  startup_script = templatefile("${path.module}/../userdata/installation-wrapper-script.sh", {
+    account_name           = "only for azure"
+    cloud                  = "gcp"
+    connection_string      = "only for azure"
+    connectors_script_name = "opencti-connectors.sh"
+    install_script_name    = "opencti-installer.sh"
+    login_email            = var.login_email
+    storage_bucket         = var.storage_bucket
+  })
 }
 
 resource "google_compute_instance" "opencti_instance" {
@@ -27,7 +25,7 @@ resource "google_compute_instance" "opencti_instance" {
   }
 
   # Startup script
-  metadata_startup_script = data.template_file.startup_script.rendered
+  metadata_startup_script = local.startup_script
 
   network_interface {
     network = "default"
